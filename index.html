@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0E4A84">
+<meta name="description" content="HYU Foodie: halal, pork-free, vegan and Chinese food near Hanyang University ERICA, with student votes and an AI food bot.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>HYU Foodie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: one phone-width column, storybook "drawn" cards (ink outline + hard offset shadow), fixed bottom tab bar. Single light look on purpose. */
+:root{
+  --blue:#0E4A84; --blue-soft:#E4EDF7; --sky:#BFE0F6;
+  --cream:#F4F1E8; --paper:#FFFFFF; --ink:#13233A; --muted:#5F6B7C; --line:#E2DCCD;
+  --gold:#B07A00; --gold-soft:#FFF2CC; --orange:#E57C14; --orange-soft:#FFEEDC;
+  --green:#2F8A45; --green-soft:#E3F3E6; --red:#C8372D; --red-soft:#FBE7E5; --naver:#03A94F;
+  --display:"Fredoka","Baloo 2","Nunito",ui-rounded,system-ui,sans-serif;
+  --body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --shadow:3px 3px 0 var(--ink); --shadow-sm:2px 2px 0 var(--ink);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--cream);color:var(--ink)}
+body{font-family:var(--body);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--cream)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.app{max-width:460px;margin:0 auto;min-height:100%;padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+.view{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 24px;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:0}
+h1{font-size:28px;line-height:1.08;font-weight:700}
+h2{font-size:20px;font-weight:700}
+h3{font-size:17px;font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.wrap{flex-wrap:wrap}
+.card{background:var(--paper);border:2px solid var(--ink);border-radius:18px;box-shadow:var(--shadow)}
+.pad{padding:14px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:6px}
+.iconbtn{width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);display:grid;place-items:center;box-shadow:var(--shadow-sm);flex:none}
+.iconbtn svg{width:20px;height:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:2px solid var(--ink);border-radius:999px;padding:12px 18px;font-weight:800;background:var(--paper);box-shadow:var(--shadow-sm);text-decoration:none;color:var(--ink);min-height:46px}
+.btn:active{transform:translate(2px,2px);box-shadow:none}
+.btn.primary{background:var(--blue);color:#fff}
+.btn.naver{background:var(--naver);color:#fff}
+.btn.orange{background:var(--orange);color:#fff}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn svg{width:18px;height:18px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:2px solid var(--ink);border-radius:999px;padding:7px 14px;background:var(--paper);font-weight:700;font-size:13px}
+.chip[aria-pressed="true"]{background:var(--blue);color:#fff}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:800;white-space:nowrap}
+.badge svg{width:12px;height:12px}
+.b-halal{background:var(--blue-soft);color:var(--blue)}
+.b-pork{background:var(--orange-soft);color:var(--orange)}
+.b-vegan{background:var(--green-soft);color:var(--green)}
+.b-chinese{background:var(--red-soft);color:var(--red)}
+.b-none{background:var(--cream);color:var(--muted);border:1.5px solid var(--line)}
+.b-gold{background:var(--gold-soft);color:var(--gold)}
+.b-pick{background:var(--gold-soft);color:var(--gold);border:1.5px solid var(--gold);border-radius:999px}
+.search{display:flex;align-items:center;gap:10px;border:2px solid var(--ink);border-radius:999px;background:var(--paper);padding:0 16px;min-height:50px;box-shadow:var(--shadow-sm)}
+.search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font-size:15px}
+.search svg{width:18px;height:18px;flex:none;color:var(--muted)}
+/* hero */
+.hero{position:relative;overflow:hidden;background:var(--sky);aspect-ratio:1/0.92;max-width:100%}
+.hero img{position:absolute;width:112%;left:-6%;top:16%;max-width:none}
+.hero .ht{position:absolute;left:18px;top:16px;right:18px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.hero h1{font-size:36px;line-height:.95}
+.pill-dark{background:var(--ink);color:#fff;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;white-space:nowrap}
+.hero .stat{position:absolute;left:16px;bottom:14px;background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;box-shadow:var(--shadow-sm)}
+/* grid tiles */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px 10px;border:2px solid var(--ink);border-radius:18px;background:var(--paper);box-shadow:var(--shadow-sm);font-weight:800;font-size:12px;text-decoration:none;color:var(--ink);text-align:center}
+.tile .ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center}
+.tile .ic svg{width:20px;height:20px}
+/* place cards */
+.list{display:flex;flex-direction:column;gap:12px}
+.pcard{display:flex;gap:12px;padding:10px;align-items:center;text-decoration:none;color:inherit}
+.thumb{width:84px;height:84px;border-radius:14px;border:2px solid var(--ink);flex:none;overflow:hidden;display:grid;place-items:center;background:var(--blue-soft)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb .cu{word-break:keep-all;font-family:var(--display);font-weight:700;font-size:13px;text-align:center;padding:4px;line-height:1.1}
+.pinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.pinfo h3{font-size:16px}
+.meter{height:8px;border-radius:8px;background:var(--gold-soft);overflow:hidden;border:1.5px solid var(--ink)}
+.meter i{display:block;height:100%;background:var(--gold)}
+.hscroll{display:flex;gap:12px;overflow-x:auto;padding:2px 4px 8px 2px;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.vcard{flex:none;width:210px;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column}
+.vcard .ph{height:112px;border-bottom:2px solid var(--ink);display:grid;place-items:center;background:var(--blue-soft);overflow:hidden}
+.vcard .ph img{width:100%;height:100%;object-fit:cover}
+.vcard .bd{padding:12px;display:flex;flex-direction:column;gap:6px}
+/* detail */
+.dhero{overflow:hidden;aspect-ratio:4/3;max-width:100%;display:grid;place-items:center;background:var(--blue-soft)}
+.dhero img{width:100%;height:100%;object-fit:cover}
+.dhero .cu{font-family:var(--display);font-size:28px;font-weight:700}
+.info{display:flex;flex-direction:column}
+.info div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;padding:12px 0;border-bottom:1.5px dashed var(--line)}
+.info div:last-child{border-bottom:0}
+.info dt{font-weight:800}
+.info dd{margin:0}
+.dish{display:flex;align-items:center;gap:10px;padding:8px 0}
+.num{width:26px;height:26px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none;background:var(--paper)}
+.num.gold{background:var(--orange);color:#fff}
+.vote{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vote .btn{border-radius:14px}
+.vote .yes[aria-pressed="true"]{background:var(--gold-soft);color:var(--gold);border-color:var(--gold);box-shadow:2px 2px 0 var(--gold)}
+.vote .no[aria-pressed="true"]{background:var(--red-soft);color:var(--red)}
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mode{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border:2px solid var(--ink);border-radius:16px;background:var(--cream);text-decoration:none;color:var(--ink);font-weight:800;font-size:12px}
+.mascot{width:52px;height:52px;border-radius:50%;border:2px dashed var(--blue);background:var(--sky);display:grid;place-items:center;color:var(--blue)}
+.mascot svg{width:24px;height:24px}
+/* map */
+.mapwrap{position:relative;overflow:hidden;aspect-ratio:3/4;max-width:100%}
+.mapwrap>img{width:100%;height:100%;object-fit:cover;display:block}
+.lm{position:absolute;transform:translate(-50%,-50%);background:var(--paper);border:1.5px solid var(--ink);border-radius:999px;padding:2px 8px;font-size:10px;font-weight:800;white-space:nowrap;box-shadow:2px 2px 0 var(--ink);display:flex;align-items:center;gap:4px;pointer-events:none}
+.lm i{width:7px;height:7px;border-radius:50%;display:block}
+.pin{position:absolute;transform:translate(-50%,-100%);border:0;background:none;padding:0;width:34px;height:42px}
+.pin svg{width:34px;height:42px;filter:drop-shadow(2px 2px 0 var(--ink))}
+.pin span{position:absolute;top:7px;left:0;right:0;text-align:center;font-weight:800;font-size:12px;color:#fff}
+.pin[aria-pressed="true"] svg path{fill:var(--orange)}
+/* chat */
+.bubble{max-width:86%;padding:10px 14px;border:2px solid var(--ink);border-radius:18px;background:var(--paper);box-shadow:var(--shadow-sm);white-space:pre-wrap}
+.bubble.me{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:6px}
+.bubble.bot{border-bottom-left-radius:6px}
+.composer{display:flex;gap:8px}
+.composer input,.field{flex:1;min-width:0;border:2px solid var(--ink);border-radius:999px;padding:12px 16px;background:var(--paper);box-shadow:var(--shadow-sm);outline:0}
+textarea.field{border-radius:16px;min-height:96px;resize:vertical;width:100%}
+.steps{display:flex;flex-direction:column}
+.step{border-top:2px solid var(--ink);padding:12px 0;display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px}
+.step b{font-family:var(--display);font-size:34px;line-height:1;color:var(--blue)}
+.check{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1.5px dashed var(--line)}
+.check:first-child{border-top:0}
+.dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--blue);display:grid;place-items:center;flex:none;color:var(--blue)}
+.dot.done{background:var(--blue-soft)}
+.dot svg{width:12px;height:12px}
+.spin{width:12px;height:12px;border:2px solid var(--blue);border-right-color:transparent;border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.note{border:2px dashed var(--blue);background:var(--blue-soft);border-radius:14px;padding:10px 12px;font-size:12px;font-weight:600;color:var(--blue)}
+.toast{position:fixed;left:50%;bottom:calc(98px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;font-size:13px;z-index:40;max-width:calc(100% - 32px);text-align:center}
+.empty{text-align:center;padding:24px 16px;display:flex;flex-direction:column;gap:8px;align-items:center}
+/* tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:2px solid var(--ink);padding:8px max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.tabbar nav{max-width:460px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);align-items:end}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--muted);text-decoration:none;padding:2px 0}
+.tab svg{width:24px;height:24px}
+.tab[aria-current="page"]{color:var(--blue)}
+.tab.ai .ic{width:48px;height:48px;border-radius:50%;background:var(--orange);border:2px solid var(--ink);display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm);margin-top:-22px}
+.tab.ai{color:var(--orange)}
+.tab.ai[aria-current="page"] .ic{background:var(--blue)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+select.field{border-radius:999px;appearance:auto}
+.ok{color:var(--green);font-weight:800}
+/* standalone base + Kakao map markers */
+html,body{margin:0}
+body{padding-top:env(safe-area-inset-top,0px)}
+img{max-width:100%}
+[hidden]{display:none!important}
+.kdot{width:14px;height:14px;border-radius:50%;border:2px solid #13233A;padding:0;cursor:pointer;display:block}
+.kdot.on{width:26px;height:26px;box-shadow:0 0 0 3px #E57C14}
+.kgate{background:#0E4A84;color:#fff;font-weight:800;font-size:11px;padding:3px 9px;border-radius:999px;border:2px solid #fff;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <main id="view" class="view" aria-live="polite"></main>
+</div>
+<div class="tabbar"><nav id="tabs" aria-label="Main"></nav></div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+// ---------- data: places.json (Kakao Map + HESS Food Guide for Muslims) ----------
+let PLACES=[],PMAP=new Map();
+const DIET={halal:["Halal certified","b-halal","shield"],porkfree:["Pork-free options","b-pork","info"],halalc:["Maybe halal · check","b-gold","info"],veganc:["Salad · vegan options?","b-vegan","leaf"],chinese:["Chinese","b-chinese","bowl"],none:["Not checked","b-none","info"]};
+const FILTERS=[["all","All"],["halal","Halal"],["porkfree","Pork-free"],["chinese","Chinese"],["vegan","Vegan & salad"],["Korean","Korean"],["Cafe","Cafe"],["Western","Western"],["Japanese","Japanese"],["Chicken","Chicken"],["Korean street food","Street food"],["Snacks & dessert","Dessert"],["Asian","Asian"]];
+function match(p,f){if(f==="all")return true;if(f==="halal")return p.diet==="halal"||p.diet==="halalc";if(f==="porkfree")return p.diet==="porkfree";if(f==="vegan")return p.diet==="veganc"||p.group==="Salad";if(f==="chinese")return p.diet==="chinese";return p.group===f;}
+const distTxt=p=>p.m!=null?`${p.m} m · ${p.w} min walk`:"near ERICA";
+const PICK_MIN=20, PICK_PCT=0.7;
+
+// ---------- icons ----------
+const I={home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',compass:'<circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/>',spark:'<path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/><path d="M19 3v4M21 5h-4"/>',bookmark:'<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',map:'<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',back:'<path d="m15 18-6-6 6-6"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',leaf:'<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path d="M2 21c0-3 1.9-5.4 5.1-6C9.5 14.5 12 13 13 12"/>',bowl:'<path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M7 7c1-2 3-2 4 0s3 2 4 0"/>',bag:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/>',link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',award:'<circle cx="12" cy="8" r="6"/><path d="M15.5 12.9 17 22l-5-3-5 3 1.5-9.1"/>',up:'<path d="M7 10v12M15 5.9 14 10h5.8a2 2 0 0 1 1.9 2.6l-2.3 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.8a2 2 0 0 0 1.8-1.1L12 2a3.1 3.1 0 0 1 3 3.9Z"/>',down:'<path d="M17 14V2M9 18.1 10 14H4.2a2 2 0 0 1-1.9-2.6l2.3-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.8a2 2 0 0 0-1.8 1.1L12 22a3.1 3.1 0 0 1-3-3.9Z"/>',nav:'<path d="m3 11 19-9-9 19-2-8z"/>',copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',walk:'<circle cx="13" cy="4" r="2"/><path d="m9 20 3-6 3 2v6M7 12l3-4 4 1 3 3M10 8l-2 6"/>',bus:'<rect x="4" y="3" width="16" height="15" rx="2"/><path d="M4 11h16M8 21v-3M16 21v-3"/>',car:'<path d="M5 17h14v-5l-2-5H7l-2 5z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/>',send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',check:'<path d="M20 6 9 17l-5-5"/>',camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'};
+const ic=(n,fill)=>`<svg viewBox="0 0 24 24" fill="${fill?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const byId=id=>PMAP.get(id);
+const naverUrl=p=>"https://map.naver.com/p/search/"+encodeURIComponent((p.ko||p.name)+" "+p.address);
+const kakaoUrl=p=>p.k?"https://place.map.kakao.com/"+p.k:"https://map.kakao.com/?q="+encodeURIComponent(p.ko||p.name);
+
+// ---------- state ----------
+const CFG=window.HYU_CONFIG||{};
+const S={sb:null,uid:null,online:false,totals:{},my:{},votesLoaded:false,saved:new Set(),filter:"all",q:"",sort:"top",limit:30,zoom:1,mapView:(CFG.KAKAO_JS_KEY?"kakao":"real"),chat:[],botBusy:false,imp:null,impImg:null,impImgUrl:null,mapSel:null,canVote:true,aiOff:false};
+function tally(id){const v=S.totals[id]||[0,0];const y=v[0],n=v[1],t=y+n;return {y,n,t,pct:t?y/t:0,pick:t>=PICK_MIN&&y/t>=PICK_PCT&&y>n};}
+const myVote=id=>S.my[id]||0;
+function score(p){const t=tally(p.id);return (t.pick?1000:0)+t.y*3-t.n*2+({halal:40,porkfree:20,halalc:10}[p.diet]||0)-(p.m??900)/100;}
+
+// ---------- backend: places.json + Supabase (votes, saved) + /api (AI) ----------
+async function boot(){
+  render();
+  try{const r=await fetch("places.json");PLACES=await r.json();PMAP=new Map(PLACES.map(p=>[p.id,p]));}catch(e){toast("Could not load places. Check your connection.");}
+  loadLocalSaved();render();
+  if(CFG.SUPABASE_URL&&CFG.SUPABASE_ANON_KEY&&window.supabase){
+    try{
+      S.sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY);
+      let {data:{session}}=await S.sb.auth.getSession();
+      if(!session){const r=await S.sb.auth.signInAnonymously();if(r.error)throw r.error;session=r.data.session;}
+      S.uid=session.user.id;S.online=true;
+      await Promise.all([loadTotals(),loadMine(),syncSaved()]);
+      setInterval(()=>{if(document.visibilityState==="visible")loadTotals().then(softRender);},60000);
+    }catch(e){console.warn("Supabase not ready:",e);S.online=false;}
+  }
+  render();
+}
+async function loadTotals(){if(!S.sb)return;const {data,error}=await S.sb.from("vote_totals").select("place_id,yes,no");if(error){S.votesLoaded="error";return;}const t={};for(const r of data||[])t[r.place_id]=[Number(r.yes)||0,Number(r.no)||0];S.totals=t;S.votesLoaded=true;}
+async function loadMine(){const {data}=await S.sb.from("votes").select("place_id,value");const m={};(data||[]).forEach(r=>m[r.place_id]=r.value);S.my=m;}
+async function syncSaved(){const {data,error}=await S.sb.from("saved").select("place_id");if(error)return;const server=new Set((data||[]).map(r=>r.place_id));const local=[...S.saved].filter(id=>!server.has(id));if(local.length)await S.sb.from("saved").upsert(local.map(place_id=>({user_id:S.uid,place_id})),{onConflict:"user_id,place_id"});local.forEach(id=>server.add(id));S.saved=new Set([...server].filter(byId));saveLocal();}
+function loadLocalSaved(){try{const v=JSON.parse(localStorage.getItem("hyu-saved")||"[]");if(Array.isArray(v))v.forEach(x=>byId(x)&&S.saved.add(x));}catch(e){}}
+function saveLocal(){try{localStorage.setItem("hyu-saved",JSON.stringify([...S.saved]));}catch(e){}}
+function persistSaved(){saveLocal();if(S.sb&&S.uid){const rows=[...S.saved].map(place_id=>({user_id:S.uid,place_id}));if(rows.length)S.sb.from("saved").upsert(rows,{onConflict:"user_id,place_id"}).then(()=>{});}}
+async function toggleSave(id){
+  const on=!S.saved.has(id);if(on)S.saved.add(id);else S.saved.delete(id);saveLocal();toast(on?"Saved":"Removed from Saved");render();
+  if(S.sb&&S.uid){const q=on?S.sb.from("saved").upsert({user_id:S.uid,place_id:id},{onConflict:"user_id,place_id"}):S.sb.from("saved").delete().eq("user_id",S.uid).eq("place_id",id);const {error}=await q;if(error)toast("Saved on this phone only.");}
+}
+let voting=false;
+async function vote(id,val){
+  if(!S.sb||!S.uid){toast("Voting is not connected yet. The app owner must set up Supabase.");return;}
+  if(voting)return;voting=true;
+  const prev=S.my[id]||0,next=prev===val?0:val;
+  const t=S.totals[id]?[...S.totals[id]]:[0,0];if(prev===1)t[0]--;if(prev===-1)t[1]--;if(next===1)t[0]++;if(next===-1)t[1]++;S.totals[id]=t;if(next)S.my[id]=next;else delete S.my[id];render();
+  try{
+    const q=next?S.sb.from("votes").upsert({user_id:S.uid,place_id:id,value:next,updated_at:new Date().toISOString()},{onConflict:"user_id,place_id"}):S.sb.from("votes").delete().eq("user_id",S.uid).eq("place_id",id);
+    const {error}=await q;if(error)throw error;
+    toast(next===1?"Thanks! You said Worth it.":next===-1?"Thanks for the honest vote.":"Vote removed");loadTotals().then(softRender);
+  }catch(e){if(prev)S.my[id]=prev;else delete S.my[id];await loadTotals();render();toast("Vote not saved. Check your connection.");}
+  finally{voting=false;}
+}
+async function api(path,body){const r=await fetch(path,body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{});let j=null;try{j=await r.json();}catch(e){}if(!r.ok)throw {code:(j&&j.error)||("http_"+r.status)};return j;}
+
+// ---------- UI pieces ----------
+function badge(d){const [l,c,i]=DIET[d];return `<span class="badge ${c}">${ic(i)}${l}</span>`;}
+function pickBadge(t){return t.pick?`<span class="badge b-pick">${ic("award")}ERICA Pick · ${Math.round(t.pct*100)}%</span>`:"";}
+function thumb(p,cls="thumb"){return `<div class="${cls}">${p.img?`<img src="img/${p.img}.webp" alt="" loading="lazy">`:`<span class="cu">${esc(p.cuisine)}</span>`}</div>`;}
+function voteLine(p){const t=tally(p.id);if(!t.t)return `<span class="small muted">No votes yet</span>`;return `<div class="row small"><div class="meter" style="flex:1"><i style="width:${Math.round(t.pct*100)}%"></i></div><b style="color:var(--gold)">${Math.round(t.pct*100)}% · ${t.t} vote${t.t>1?"s":""}</b></div>`;}
+function pcard(p){return `<a class="card pcard" href="#p-${p.id}">${thumb(p)}<div class="pinfo"><div class="row wrap" style="gap:6px">${badge(p.diet)}${pickBadge(tally(p.id))}</div><h3>${esc(p.name)}</h3>${p.ko&&p.ko!==p.name?`<span class="small" style="font-weight:700;margin-top:-3px">${esc(p.ko)}</span>`:""}<span class="small muted">${esc(p.cuisine)} · ${distTxt(p)}</span>${voteLine(p)}</div></a>`;}
+function vcard(p){return `<a class="card vcard" href="#p-${p.id}"><div class="ph">${p.img?`<img src="img/${p.img}.webp" alt="" loading="lazy">`:`<span class="cu" style="font-family:var(--display);font-weight:700">${esc(p.cuisine)}</span>`}</div><div class="bd"><div class="row wrap" style="gap:6px">${badge(p.diet)}</div><h3>${esc(p.name)}</h3>${p.ko&&p.ko!==p.name?`<span class="small" style="font-weight:700;margin-top:-4px">${esc(p.ko)}</span>`:""}${voteLine(p)}</div></a>`;}
+function topbar(title,right=""){return `<div class="topbar"><a class="iconbtn" href="#home" onclick="if(history.length>1){history.back();return false}" aria-label="Back">${ic("back")}</a><h2 style="font-size:18px;flex:1;text-align:center">${esc(title)}</h2>${right||'<span style="width:42px"></span>'}</div>`;}
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2400);}
+function sorted(list){return [...list].sort((a,b)=>score(b)-score(a));}
+
+// ---------- views ----------
+function vHome(){
+  const picks=sorted(PLACES).slice(0,6);
+  const near=[...PLACES].filter(p=>p.m!=null&&p.group!=="Cafe").sort((a,b)=>a.m-b.m).slice(0,4);
+  return `
+  <div class="topbar"><div class="row"><span class="iconbtn" aria-hidden="true">${ic("user")}</span><h2>Hi there!</h2></div><a class="iconbtn" href="#import" aria-label="Import from social media">${ic("link")}</a></div>
+  <section class="card hero" aria-label="Your community">
+    <img src="img/town.webp" alt="Illustrated campus town with restaurants">
+    <div class="ht"><div><div class="eyebrow">Your community</div><h1>HANYANG<br>ERICA</h1></div><span class="pill-dark">Ansan · Beta</span></div>
+    <span class="stat">${PLACES.length} places within 1.5 km</span>
+  </section>
+  <form class="search" onsubmit="event.preventDefault();S.q=this.q.value;S.limit=30;location.hash='explore'"><label class="sr" for="q">Search</label>${ic("search")}<input id="q" name="q" placeholder='Search "kebab", "마라탕", "curry"' autocomplete="off"></form>
+  <div class="tiles">
+    ${tile("Halal","explore","shield","var(--blue-soft)","var(--blue)","halal")}
+    ${tile("Pork-free","explore","info","var(--orange-soft)","var(--orange)","porkfree")}
+    ${tile("Vegan","explore","leaf","var(--green-soft)","var(--green)","vegan")}
+    ${tile("Chinese","explore","bowl","var(--red-soft)","var(--red)","chinese")}
+    ${tile("Map","map","map","var(--sky)","var(--blue)")}
+    ${tile("Import","import","link","var(--blue-soft)","var(--blue)")}
+    ${tile("ERICA Pick","pick","award","var(--gold-soft)","var(--gold)")}
+    ${tile("AI Bot","bot","spark","var(--orange-soft)","var(--orange)")}
+  </div>
+  <div class="row between"><h2>Top for students</h2><a href="#pick" class="small" style="color:var(--blue);font-weight:800">Ranking</a></div>
+  <div class="hscroll">${picks.map(vcard).join("")}</div>
+  <div class="row between"><h2>Closest to campus</h2><a href="#explore" onclick="S.filter='all';S.sort='near';S.limit=30" class="small" style="color:var(--blue);font-weight:800">See all</a></div>
+  <div class="list">${near.map(pcard).join("")}</div>
+  <div class="note">Beta data: ${PLACES.length} restaurants and cafes from Kakao Map within 1.5 km of ERICA (bars left out). 12 are checked by the HESS Food Guide for Muslims. "Not checked" means nobody has checked halal status yet. Pictures are drawings of the food type, not photos of the shop.</div>`;
+}
+function tile(l,h,i,bg,fg,f){return `<a class="tile" href="#${h}" ${f?`onclick="S.filter='${f}';S.limit=30;S.sort='top'"`:""}><span class="ic" style="background:${bg};color:${fg}">${ic(i)}</span>${l}</a>`;}
+function filtered(){const q=S.q.trim().toLowerCase();let l=PLACES.filter(p=>match(p,S.filter));if(q)l=l.filter(p=>(p.name+" "+(p.ko||"")+" "+p.cuisine+" "+(p.cat||"")+" "+(p.dishes||[]).join(" ")).toLowerCase().includes(q));return S.sort==="near"?[...l].sort((a,b)=>(a.m??9999)-(b.m??9999)):sorted(l);}
+function vExplore(){
+  return `<div class="topbar"><h1 style="font-size:26px">Explore</h1><a class="iconbtn" href="#map" aria-label="Map">${ic("map")}</a></div>
+  <form class="search" onsubmit="event.preventDefault()"><label class="sr" for="q2">Search</label>${ic("search")}<input id="q2" value="${esc(S.q)}" placeholder="Search food, restaurant, 한글 OK" oninput="S.q=this.value;S.limit=30;renderList()" autocomplete="off"></form>
+  <div class="chips" role="group" aria-label="Filter">${FILTERS.map(([k,l])=>`<button class="chip" aria-pressed="${S.filter===k}" onclick="S.filter='${k}';S.limit=30;render()">${l}</button>`).join("")}</div>
+  <div id="list">${listHtml(filtered())}</div>`;
+}
+function listHtml(list){
+  if(!list.length)return `<div class="card empty"><h3>No match</h3><p class="muted small">Try another word or another filter. Korean names work too.</p></div>`;
+  const head=`<div class="row between" style="margin-bottom:10px"><p class="small muted">${list.length} place${list.length>1?"s":""}</p><div class="row" style="gap:6px">${[["top","Top"],["near","Nearest"]].map(([k,l])=>`<button class="chip" style="padding:5px 12px" aria-pressed="${S.sort===k}" onclick="S.sort='${k}';S.limit=30;renderList()">${l}</button>`).join("")}</div></div>`;
+  const more=list.length>S.limit?`<button class="btn block" style="margin-top:12px" onclick="S.limit+=30;renderList()">Show more (${list.length-S.limit} left)</button>`:"";
+  return head+`<div class="list">${list.slice(0,S.limit).map(pcard).join("")}</div>`+more;
+}
+function renderList(){const el=document.getElementById("list");if(el)el.innerHTML=listHtml(filtered());}
+
+const DIETNOTE={none:"Nobody has checked this place for halal food yet. Ask staff about pork, lard and alcohol before you order.",chinese:"Chinese dishes often use pork or pork stock. Ask staff before you order.",halalc:"The name or category suggests halal food, but it is not verified. Ask to see the halal certificate.",veganc:"Salad place. Ask staff which dishes have no meat, egg or dairy."};
+function vPlace(id){
+  const p=byId(id);if(!p)return vHome();
+  const t=tally(p.id),mv=myVote(p.id),saved=S.saved.has(p.id);
+  const need=Math.max(0,PICK_MIN-t.t);
+  return `${topbar(p.name,`<button class="iconbtn" onclick="toggleSave('${p.id}')" aria-pressed="${saved}" aria-label="${saved?"Remove from saved":"Save"}" style="${saved?"background:var(--blue);color:#fff":""}">${ic("bookmark",saved)}</button>`)}
+  <div class="card dhero" style="position:relative">${p.img?`<img src="img/${p.img}.webp" alt="Illustration of ${esc(p.cuisine)} food"><span class="badge b-none" style="position:absolute;left:10px;bottom:10px;background:var(--paper)">Illustration · not the real shop</span>`:`<div style="text-align:center;padding:16px"><div class="cu">${esc(p.cuisine)}</div><p class="muted" style="margin-top:6px;font-weight:700">${esc(p.ko||"")}</p></div>`}</div>
+  <section class="row wrap" style="gap:6px">${badge(p.diet)}${pickBadge(t)}</section>
+  <div style="display:flex;flex-direction:column;gap:4px;margin-top:-6px"><h1>${esc(p.name)}</h1>${p.ko&&p.ko!==p.name?`<p style="font-size:17px;font-weight:800">${esc(p.ko)}</p>`:""}<p class="muted">${esc(p.cuisine)} · ${distTxt(p)}</p></div>
+  ${p.note?`<div class="note" style="border-color:var(--orange);background:var(--orange-soft);color:var(--orange)">Staff tip: ${esc(p.note)}</div>`:""}
+  ${DIETNOTE[p.diet]?`<div class="note" style="border-color:var(--muted);background:var(--paper);color:var(--ink)">${DIETNOTE[p.diet]}</div>`:""}
+  <section class="card pad" style="display:flex;flex-direction:column;gap:10px">
+    <div class="row between"><span class="eyebrow" style="color:var(--gold)">Community vote</span><span class="small muted">${t.t?`${t.y} of ${t.t} said Worth it`:"Be the first to vote"}</span></div>
+    <h3>Was it worth it?</h3>
+    <div class="meter"><i style="width:${Math.round(t.pct*100)}%"></i></div>
+    <p class="small muted">${t.pick?"This place is an ERICA Pick.":need?`${need} more vote${need>1?"s":""} needed for an ERICA Pick badge (and 70% Worth it).`:"Needs 70% Worth it for the ERICA Pick badge."}</p>
+    ${S.canVote?`<div class="vote"><button class="btn yes" aria-pressed="${mv===1}" onclick="vote('${p.id}',1)">${ic("up")}Worth it</button><button class="btn no" aria-pressed="${mv===-1}" onclick="vote('${p.id}',-1)">${ic("down")}Not worth it</button></div>`:`<p class="small" style="font-weight:700">Voting is not available right now.</p>`}
+  </section>
+  ${(p.dishes||[]).length?`<section class="card pad"><h3 style="margin-bottom:4px">Recommended dishes</h3>${p.dishes.map((d,i)=>`<div class="dish"><span class="num ${i===0?"gold":""}">${i+1}</span><span style="font-weight:700">${esc(d)}</span></div>`).join("")}</section>`:""}
+  <section class="card pad"><h3 style="margin-bottom:4px">Store details</h3><dl class="info" style="margin:0">
+    ${p.ko&&p.ko!==p.name?`<div><dt>English name</dt><dd>${esc(p.name)} <span class="small muted">(app spelling)</span></dd></div><div><dt>Korean name</dt><dd>${esc(p.ko)}</dd></div>`:""}
+    <div><dt>Food type</dt><dd>${esc(p.cuisine)}${p.cat?`<br><span class="small muted">${esc(p.cat)}</span>`:""}</dd></div>
+    <div><dt>Dietary</dt><dd>${DIET[p.diet][0]}</dd></div>
+    <div><dt>Address</dt><dd>${esc(p.address)} <button class="badge b-halal" style="border:0;margin-left:4px" onclick="copyText(byId('${p.id}').address,'Address copied')">${ic("copy")}Copy</button></dd></div>
+    ${p.phone?`<div><dt>Phone</dt><dd><span style="user-select:all">${esc(p.phone)}</span> <button class="badge b-halal" style="border:0;margin-left:4px" onclick="copyText('${esc(p.phone)}','Number copied')">${ic("copy")}Copy</button></dd></div>`:""}
+    <div><dt>Distance</dt><dd>${p.m!=null?`${p.m} m from ERICA campus · about ${p.w} min walk`:"Near ERICA"}</dd></div>
+    <div><dt>Hours, price, seats</dt><dd class="muted">Check in Kakao or Naver Map</dd></div>
+    <div><dt>Source</dt><dd>${p.hess?"HESS Food Guide for Muslims + Kakao Map":"Kakao Map"}</dd></div>
+  </dl></section>
+  <section class="card pad" style="display:flex;flex-direction:column;gap:12px">
+    <h3>How to get there</h3>
+    <div class="modes">${[["walk","Walk"],["bus","Bus"],["car","Taxi"]].map(([i,l])=>`<a class="mode" href="${naverUrl(p)}" target="_blank" rel="noopener"><span class="mascot">${ic(i)}</span>${l}</a>`).join("")}</div>
+    <a class="btn naver block" href="${naverUrl(p)}" target="_blank" rel="noopener">${ic("nav")}Open in Naver Map</a>
+    <a class="btn block" href="${kakaoUrl(p)}" target="_blank" rel="noopener" style="background:#FEE500">${ic("map")}Open in Kakao Map</a>
+    <p class="small muted">The map app opens with this place. Pick walk, bus or taxi there for the route, hours and prices.</p>
+  </section>`;
+}
+async function copyText(t,msg){try{await navigator.clipboard.writeText(t);toast(msg);}catch(e){toast(t);}}
+
+const LAT0=37.2970,LON0=126.8350,KX=Math.cos(LAT0*Math.PI/180)*111320,KY=110540;
+const DOT={halal:"#0E4A84",porkfree:"#E57C14",halalc:"#B07A00",veganc:"#2F8A45",chinese:"#C8372D",none:"#A39C8C"};
+function xy(p){return [(p.lon-LON0)*KX,-(p.lat-LAT0)*KY];}
+function vMap(){
+  const sel=S.mapSel&&byId(S.mapSel);
+  const seg=`<div class="chips" role="group" aria-label="Map view">${[...(CFG.KAKAO_JS_KEY?[["kakao","Kakao map"]]:[]),["real","Dot map"],["art","Drawn map"]].map(([k,l])=>`<button class="chip" aria-pressed="${S.mapView===k}" onclick="S.mapView='${k}';render()">${l}</button>`).join("")}</div>`;
+  const legend=`<div class="row wrap small" style="gap:10px">${[["halal","Halal"],["porkfree","Pork-free"],["chinese","Chinese"],["veganc","Salad"],["none","Not checked"]].map(([k,l])=>`<span class="row" style="gap:5px"><i style="width:12px;height:12px;border-radius:50%;background:${DOT[k]};border:1.5px solid #13233A;display:inline-block"></i>${l}</span>`).join("")}</div>`;
+  if(S.mapView==="kakao"&&CFG.KAKAO_JS_KEY)return `<div class="topbar"><h1 style="font-size:26px">ERICA map</h1></div>${seg}
+  <div class="chips" role="group" aria-label="Filter">${FILTERS.slice(0,5).map(([k,l])=>`<button class="chip" aria-pressed="${S.filter===k}" onclick="S.filter='${k}';render()">${l}</button>`).join("")}</div>
+  <div id="kmap" class="card" style="height:440px;overflow:hidden" aria-label="Kakao map of places near ERICA"></div>${legend}<div id="mapcard">${mapCard()}</div>`;
+  if(S.mapView==="art")return `<div class="topbar"><h1 style="font-size:26px">ERICA map</h1></div>${seg}
+  <div class="card mapwrap"><img src="img/map.webp" alt="Drawn map of the area around Hanyang University ERICA"></div>
+  <p class="small muted">Illustration of the ERICA area. It is not to scale. Use "Real positions" to find places.</p>`;
+  const list=PLACES.filter(p=>p.lat&&match(p,S.filter));
+  const z=S.zoom, size=3300/z; let cx=0,cy=0; if(sel&&sel.lat&&z>1){[cx,cy]=xy(sel);} const vb=`${cx-size/2} ${cy-size/2} ${size} ${size}`;
+  const r=k=>(k==="none"?16:24)/Math.sqrt(z);
+  const RANK={none:0,chinese:1,veganc:2,halalc:3,porkfree:4,halal:5};const dots=list.sort((a,b)=>((a.id===S.mapSel)-(b.id===S.mapSel))||(RANK[a.diet]-RANK[b.diet])).map(p=>{const [x,y]=xy(p);const on=S.mapSel===p.id;return `<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${(on?2:1)*r(p.diet)}" fill="${DOT[p.diet]}" stroke="#13233A" stroke-width="${(on?8:4)/Math.sqrt(z)}" tabindex="0" role="button" aria-label="${esc(p.name)}" onclick="S.mapSel='${p.id}';render()" onkeydown="if(event.key==='Enter'){S.mapSel='${p.id}';render()}" style="cursor:pointer"><title>${esc(p.name)}</title></circle>`;}).join("");
+  const rings=[500,1000,1500].map(d=>`<circle cx="0" cy="0" r="${d}" fill="none" stroke="#13233A" stroke-opacity=".35" stroke-width="${6/Math.sqrt(z)}" stroke-dasharray="${30/Math.sqrt(z)} ${24/Math.sqrt(z)}"/><text x="0" y="${-d-18}" text-anchor="middle" font-size="${70/Math.sqrt(z)}" font-weight="800" fill="#5F6B7C" font-family="Plus Jakarta Sans,sans-serif">${d} m</text>`).join("");
+  return `<div class="topbar"><h1 style="font-size:26px">ERICA map</h1><div class="row" style="gap:6px"><button class="iconbtn" onclick="S.zoom=Math.max(1,S.zoom/1.6);render()" aria-label="Zoom out" style="font-weight:800;font-size:20px">−</button><button class="iconbtn" onclick="S.zoom=Math.min(6,S.zoom*1.6);render()" aria-label="Zoom in" style="font-weight:800;font-size:20px">+</button></div></div>
+  ${seg}
+  <div class="chips" role="group" aria-label="Filter">${FILTERS.slice(0,5).map(([k,l])=>`<button class="chip" aria-pressed="${S.filter===k}" onclick="S.filter='${k}';render()">${l}</button>`).join("")}</div>
+  <div class="card" style="overflow:hidden;background:#FBF8EF">
+   <svg viewBox="${vb}" style="display:block;width:100%;height:auto;aspect-ratio:1" aria-label="Map of ${list.length} places around ERICA campus">
+    <defs><pattern id="grid" width="250" height="250" patternUnits="userSpaceOnUse"><path d="M250 0H0V250" fill="none" stroke="#E2DCCD" stroke-width="4"/></pattern></defs>
+    <rect x="-3000" y="-3000" width="6000" height="6000" fill="url(#grid)"/>
+    ${rings}${dots}
+    <g transform="translate(0 0)"><circle r="${60/Math.sqrt(z)}" fill="#F4F1E8" stroke="#0E4A84" stroke-width="${12/Math.sqrt(z)}"/><circle r="${24/Math.sqrt(z)}" fill="#0E4A84"/><text y="${-90/Math.sqrt(z)}" text-anchor="middle" font-size="${80/Math.sqrt(z)}" font-weight="800" fill="#0E4A84" font-family="Fredoka,Plus Jakarta Sans,sans-serif" stroke="#FBF8EF" stroke-width="${16/Math.sqrt(z)}" paint-order="stroke">ERICA campus</text></g>
+    <text x="${cx+size/2-30}" y="${cy-size/2+90}" text-anchor="end" font-size="${80/Math.sqrt(z)}" font-weight="800" fill="#13233A" font-family="Plus Jakarta Sans,sans-serif">N ↑</text>
+   </svg>
+  </div>
+  <div class="row wrap small" style="gap:10px">${[["halal","Halal"],["porkfree","Pork-free"],["chinese","Chinese"],["veganc","Salad"],["none","Not checked"]].map(([k,l])=>`<span class="row" style="gap:5px"><i style="width:12px;height:12px;border-radius:50%;background:${DOT[k]};border:1.5px solid #13233A;display:inline-block"></i>${l}</span>`).join("")}</div>
+  ${sel?pcard(sel)+`<a class="btn naver block" href="${naverUrl(sel)}" target="_blank" rel="noopener">${ic("nav")}Route in Naver Map</a>`:`<div class="card empty"><h3>Tap a dot</h3><p class="small muted">${list.length} places shown at their real Kakao Map position. Zoom in after you tap a dot.</p></div>`}`;
+}
+function mapCard(){const sel=S.mapSel&&byId(S.mapSel);return sel?pcard(sel)+`<a class="btn naver block" style="margin-top:12px" href="${naverUrl(sel)}" target="_blank" rel="noopener">${ic("nav")}Route in Naver Map</a>`:`<div class="card empty"><h3>Tap a dot</h3><p class="small muted">Each dot is a place at its real position.</p></div>`;}
+const KRANK={none:0,chinese:1,veganc:2,halalc:3,porkfree:4,halal:5};
+let kakaoReady=null;
+function loadKakao(){if(kakaoReady)return kakaoReady;kakaoReady=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey="+encodeURIComponent(CFG.KAKAO_JS_KEY);s.onload=()=>window.kakao.maps.load(res);s.onerror=()=>{kakaoReady=null;rej();};document.head.appendChild(s);});return kakaoReady;}
+async function initKakao(){
+  const el=document.getElementById("kmap");if(!el)return;
+  try{await loadKakao();}catch(e){el.innerHTML='<div class="empty"><h3>Kakao map did not load</h3><p class="small muted">Check the JavaScript key and the site domain in the Kakao console. Use "Dot map" for now.</p></div>';return;}
+  if(!document.body.contains(el))return;
+  const K=window.kakao.maps;
+  const map=new K.Map(el,{center:new K.LatLng(S.kc?S.kc[0]:37.2995,S.kc?S.kc[1]:126.8370),level:S.kl||4});
+  K.event.addListener(map,"idle",()=>{const c=map.getCenter();S.kc=[c.getLat(),c.getLng()];S.kl=map.getLevel();});
+  new K.CustomOverlay({map,position:new K.LatLng(37.2970,126.8350),content:'<div class="kgate">ERICA</div>',yAnchor:0.5,zIndex:9});
+  const list=PLACES.filter(p=>p.lat&&match(p,S.filter)).sort((a,b)=>KRANK[a.diet]-KRANK[b.diet]);
+  for(const p of list){
+    const b=document.createElement("button");b.className="kdot"+(S.mapSel===p.id?" on":"");b.style.background=DOT[p.diet];b.title=p.name;b.setAttribute("aria-label",p.name);
+    b.addEventListener("click",()=>{S.mapSel=p.id;document.querySelectorAll(".kdot.on").forEach(x=>x.classList.remove("on"));b.classList.add("on");const mc=document.getElementById("mapcard");if(mc)mc.innerHTML=mapCard();});
+    new K.CustomOverlay({map,position:new K.LatLng(p.lat,p.lon),content:b,yAnchor:0.5,zIndex:KRANK[p.diet]});
+  }
+}
+function vPick(){
+  const list=sorted(PLACES).slice(0,30);
+  return `${topbar("ERICA Pick")}
+  <div><div class="eyebrow" style="color:var(--gold)">Community ranking</div><h1>Gold means students went, and it was worth it.</h1></div>
+  <div class="card pad small" style="display:flex;flex-direction:column;gap:6px">
+   ${["One vote per person, per place","20+ votes and 70% Worth it → gold ERICA Pick badge","More Not worth it than Worth it → badge drops","Gold is used only for ERICA Pick"].map(r=>`<div class="row" style="gap:8px"><span class="dot done" style="border-color:var(--gold);color:var(--gold);background:var(--gold-soft)">${ic("check")}</span>${r}</div>`).join("")}
+  </div>
+  ${S.votesLoaded==="slow"?`<p class="small muted">Votes cannot be reached yet. The ranking may be out of date.</p>`:""}
+  <div class="list">${list.map((p,i)=>`<div class="row"><b style="font-family:var(--display);font-size:24px;width:26px;text-align:center;color:${i<3?"var(--gold)":"var(--muted)"}">${i+1}</b><div style="flex:1;min-width:0">${pcard(p)}</div></div>`).join("")}</div>`;
+}
+
+function vSaved(){
+  const list=[...S.saved].map(byId).filter(Boolean);
+  return `<div class="topbar"><h1 style="font-size:26px">Saved</h1><a class="btn" href="#import" style="padding:8px 14px;min-height:40px">${ic("link")}Import</a></div>
+  ${list.length?`<div class="list">${list.map(pcard).join("")}</div>`:`<div class="card empty"><span class="mascot">${ic("bookmark")}</span><h3>Nothing saved yet</h3><p class="small muted">Tap the bookmark on a restaurant, or import a food post from social media.</p><a class="btn primary" href="#explore">Find food</a></div>`}
+  ${S.online?"":`<p class="small muted">Saved places stay on this phone.</p>`}`;
+}
+
+// ---------- AI bot ----------
+const MOODS=["Tired, want comfort food","Something spicy","Light and cheap","Craving meat","Quick snack between classes"];
+function vBot(){
+  return `<div class="topbar"><div class="row"><span class="iconbtn" style="background:var(--orange);color:#fff">${ic("spark")}</span><div><h2>Foodie AI</h2><span class="small muted">${S.aiOff?"Simple mode: AI is not set up yet":"Picks from "+PLACES.length+" places near ERICA"}</span></div></div></div>
+  <div style="display:flex;flex-direction:column;gap:10px" id="chat">
+    <div class="bubble bot">Hi! How are you feeling? Tell me your mood, hunger or budget and I will pick a place near ERICA.</div>
+    <div class="chips" style="flex-wrap:wrap">${MOODS.map(m=>`<button class="chip" onclick="askBot(this.textContent)">${m}</button>`).join("")}</div>
+    ${S.chat.map(chatHtml).join("")}
+  </div>
+  <form class="composer" onsubmit="event.preventDefault();const v=this.m.value.trim();if(v){askBot(v);this.m.value=''}"><label class="sr" for="m">Message</label><input id="m" name="m" placeholder="How do you feel today?" autocomplete="off" ${S.botBusy?"disabled":""}><button class="iconbtn" style="width:50px;height:50px;background:var(--blue);color:#fff" aria-label="Send" ${S.botBusy?"disabled":""}>${ic("send")}</button></form>`;
+}
+function chatHtml(m){
+  if(m.role==="user")return `<div class="bubble me">${esc(m.text)}</div>`;
+  const picks=(m.picks||[]).map(x=>({p:byId(x.id),why:x.why})).filter(x=>x.p);
+  return `<div class="bubble bot">${esc(m.text)}</div>${picks.map(({p,why})=>`<div>${pcard(p)}<p class="small" style="margin:6px 4px 0;font-weight:600">Why: ${esc(why)}</p></div>`).join("")}`;
+}
+function placeBrief(){return PLACES.map(p=>{const t=tally(p.id);return `${p.id}|${p.name}${p.ko&&p.ko!==p.name?" ("+p.ko+")":""}|${p.cuisine}|${DIET[p.diet][0]}|${p.m??"?"}m${(p.dishes||[]).length?"|dishes: "+p.dishes.join(", "):""}${p.note?"|tip: "+p.note:""}${t.t?"|votes "+t.y+"/"+t.t:""}`;}).join("\n");}
+function fallbackPicks(text){
+  const t=text.toLowerCase();const rules=[[/spic|hot|chili/,["zaika","ilmi","alchon"]],[/meat|lamb|kebab|hungry|craving/,["saray","rayhon","thechicken"]],[/cheap|light|snack|quick|between/,["gimbapq","isaac","subway"]],[/comfort|tired|cold|warm|soup/,["zaika","tamna","saray"]],[/curry|indian/,["zaika"]]];
+  for(const [re,ids] of rules)if(re.test(t))return ids;return ["saray","zaika","rayhon"];
+}
+async function askBot(text){
+  if(S.botBusy)return;S.chat.push({role:"user",text});S.botBusy=true;S.chat.push({role:"bot",text:"Thinking..."});render();
+  const slot=S.chat[S.chat.length-1];
+  try{
+    const out=await api("/api/ai",{task:"bot",message:text,votes:S.totals});
+    slot.text=String(out&&out.reply||"Here are my picks.");slot.picks=Array.isArray(out&&out.picks)?out.picks.filter(x=>x&&byId(String(x.id))).map(x=>({id:String(x.id),why:String(x.why||"")})).slice(0,3):[];
+    if(!slot.picks.length){slot.picks=fallbackPicks(text).map(id=>({id,why:"Good match for what you asked."}));}
+  }catch(e){
+    if(e&&e.code==="ai_not_configured")S.aiOff=true;
+    slot.text=(e&&e.code==="rate_limited")?"Too many questions right now. Here are quick picks:":"Here are quick picks for you:";
+    slot.picks=fallbackPicks(text).map(id=>({id,why:byId(id).dishes[0]+" is popular here."}));
+  }finally{S.botBusy=false;render();const c=document.getElementById("m");if(c)c.focus();}
+}
+
+// ---------- import from social ----------
+const EXAMPLE="Best halal curry near ERICA 🔥 cheese naan is crazy! 2F, Hanyangdaehak-ro. Also tried the lamb box kebab next door #ansan #halal";
+function vImport(){
+  const r=S.imp||{};
+  return `${topbar("Import from social")}
+  <div style="display:flex;flex-direction:column;gap:8px"><h1>Save it from anywhere. We'll find where it is.</h1><p class="muted">Paste a TikTok or YouTube link and we read the caption for you. For Instagram, add a screenshot. AI finds the shop name, dishes and location tag, then matches a place near ERICA. When it is not sure, it asks you.</p></div>
+  <form class="card pad" style="display:flex;flex-direction:column;gap:10px" onsubmit="event.preventDefault();runImport(this.u.value,this.c.value)">
+    <label class="small" for="u" style="font-weight:800">Post link (TikTok and YouTube are read automatically)</label>
+    <input class="field" id="u" name="u" placeholder="https://vt.tiktok.com/..." value="${esc(r.url||"")}">
+    <label class="small" for="shot" style="font-weight:800">Screenshot of the post (best for Instagram)</label>
+    <label class="btn block" for="shot" style="border-style:dashed">${ic("camera")}${S.impImg?"Change screenshot":"Add screenshot"}</label>
+    <input id="shot" type="file" accept="image/png,image/jpeg,image/webp" class="sr" onchange="pickShot(this.files&&this.files[0])">
+    ${S.impImgUrl?`<div class="row"><img src="${S.impImgUrl}" alt="Your screenshot" style="width:72px;height:96px;object-fit:cover;border:2px solid var(--ink);border-radius:10px"><div style="flex:1;min-width:0"><p class="small" style="font-weight:700">Screenshot added</p><button type="button" class="badge b-chinese" style="border:0" onclick="pickShot(null)">Remove</button></div></div>`:""}
+    <label class="small" for="c" style="font-weight:800">Caption or text from the post (optional)</label>
+    <textarea class="field" id="c" name="c" placeholder="Paste the caption, hashtags or location tag">${esc(r.caption||"")}</textarea>
+    <button type="button" class="small" style="align-self:flex-start;border:0;background:none;color:var(--blue);font-weight:800;text-decoration:underline;padding:0" onclick="document.getElementById('c').value=EXAMPLE">Try an example caption</button>
+    <button class="btn primary block" ${r.busy?"disabled":""}>${ic("spark")}${r.busy?"Reading the post...":"Find places"}</button>
+    <p class="small muted">Instagram and Naver Blog links cannot be read automatically. For them, add a screenshot or paste the caption.</p>
+  </form>
+  ${S.imp?impResult(S.imp):`<div class="steps">${[["1","Share the post","In TikTok or YouTube tap Share → Copy link and paste it here. For Instagram, take a screenshot."],["2","We find the place","We read the caption or screenshot, and AI matches a place near ERICA."],["3","Let's go","Saved places show on your Saved tab with a Naver Map route."]].map(([n,t,d])=>`<div class="step"><b>${n}</b><div><h3>${t}</h3><p class="small muted">${d}</p></div></div>`).join("")}</div>`}`;
+}
+function pickShot(f){if(S.impImgUrl){try{URL.revokeObjectURL(S.impImgUrl)}catch(e){}}S.impImg=f||null;S.impImgUrl=f?URL.createObjectURL(f):null;const c=document.getElementById("c"),u=document.getElementById("u");const cv=c?c.value:"",uv=u?u.value:"";if(S.imp&&!S.imp.busy){S.imp={...S.imp,caption:cv,url:uv};}render();const c2=document.getElementById("c"),u2=document.getElementById("u");if(c2)c2.value=cv;if(u2)u2.value=uv;}
+function impResult(r){
+  if(r.busy)return `<div class="card pad">${[S.impImg?"Reading the screenshot":"Reading caption and hashtags","Looking for shop names and addresses","Matching places near ERICA"].map((t,i)=>`<div class="check"><span class="dot">${i<2?ic("check"):'<i class="spin"></i>'}</span><span style="font-weight:700">${t}</span></div>`).join("")}</div>`;
+  if(r.error)return `<div class="card empty" style="border-color:var(--orange)"><h3>${esc(r.error)}</h3>${r.hint?`<p class="small muted">${esc(r.hint)}</p>`:""}</div>`;
+  const rows=r.found||[];
+  if(!rows.length)return `<div class="card empty"><h3>No place found</h3><p class="small muted">The screenshot or caption has no shop name, dish or street we can match. Try a screenshot where the name or location tag shows.</p></div>`;
+  const inList=rows.filter(x=>x.id&&byId(x.id)).length;
+  return `${r.note?`<div class="note">${esc(r.note)}</div>`:""}<h2>${rows.length} place${rows.length>1?"s":""} in this post</h2>
+  <div class="list">${rows.map((x,i)=>{const p=x.id&&byId(x.id);const sure=p&&x.conf>=70;const outside=!p&&x.outside;return `<div class="card pad" style="display:flex;flex-direction:column;gap:8px;${sure?"":"border-color:var(--orange)"}">
+    <div class="row"><span class="num ${sure?"":"gold"}">${i+1}</span><div style="flex:1;min-width:0"><h3>${esc(p?p.name:x.guess)}</h3><p class="small muted">${esc(x.reason||"")}</p></div><span class="badge ${sure?"b-halal":"b-pork"}">${sure?x.conf+"% match":outside?"Not in list yet":"Needs check"}</span></div>
+    ${sure?"":`<label class="small" for="pick${i}" style="font-weight:800">Is it one of our places?</label><select class="field" id="pick${i}" onchange="S.imp.found[${i}].id=this.value||null;S.imp.found[${i}].conf=this.value?100:0;render()"><option value="">No, it is not in the list</option>${[...PLACES].sort((a,b)=>(a.m??9999)-(b.m??9999)).map(q=>`<option value="${q.id}" ${q.id===x.id?"selected":""}>${esc(q.name)}${q.ko&&q.ko!==q.name?" · "+esc(q.ko):""}</option>`).join("")}</select>`}
+    ${!p?`<a class="btn naver block" href="https://map.naver.com/p/search/${encodeURIComponent(x.guess+" 안산")}" target="_blank" rel="noopener">${ic("nav")}Find "${esc(x.guess)}" in Naver Map</a><p class="small muted">This place is not in the list (more than 1.5 km away, or new), so it cannot be saved here.</p>`:""}
+  </div>`;}).join("")}</div>
+  ${inList?`<button class="btn orange block" onclick="saveImport()">${ic("bookmark")}Save ${inList} place${inList>1?"s":""}</button>`:""}`;
+}
+function localMatch(text){const t=text.toLowerCase();const out=[];
+  const hints={zaika:["curry","naan","nan","indian","masala","tandoori"],saray:["kebab","doner","lamb box"],rayhon:["shawarma","falafel"],gimbapq:["gimbap"],pizzaschool:["pizza"],mealplanb:["burrito"],tamna:["clam","noodle soup"],thechicken:["boneless","fried chicken"],ilmi:["dakgalbi"],isaac:["toast"],subway:["subway","sandwich"],alchon:["roe"]};
+  for(const p of PLACES){let c=0;const ko=(p.ko||"").split(" ")[0];if(t.includes(p.name.toLowerCase())||(ko.length>=2&&t.includes(ko.toLowerCase())))c=95;else if((hints[p.id]||[]).some(h=>t.includes(h)))c=60;if(c)out.push({id:p.id,guess:p.name,conf:c,reason:c>90?"Name found in the caption":"A dish in the caption matches this menu"});}
+  return out.slice(0,5);}
+async function shrink(file){const bmp=await createImageBitmap(file);const sc=Math.min(1,1280/Math.max(bmp.width,bmp.height));const c=document.createElement("canvas");c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);return {type:"image/jpeg",data:c.toDataURL("image/jpeg",0.85).split(",")[1]};}
+async function runImport(url,caption){
+  url=url.trim();let text=caption.trim();const hasImg=!!S.impImg;let note="";
+  if(!text&&!hasImg&&!url){S.imp={url,caption,error:"Add a link, a screenshot or a caption first"};render();return;}
+  S.imp={url,caption,busy:true,found:[]};render();
+  if(url&&!text){
+    try{const o=await api("/api/oembed?url="+encodeURIComponent(url));
+      if(o&&o.found){text=[o.title,o.author?"Posted by @"+o.author:""].filter(Boolean).join("\n");note=`Caption read from ${o.source}: "${o.title.slice(0,160)}"`;}
+      else if(o&&o.supported===false&&!hasImg){S.imp={url,caption,error:"This link cannot be read automatically",hint:"Instagram and Naver Blog links need a screenshot or the caption. TikTok and YouTube links work by themselves."};render();return;}
+    }catch(e){}
+  }
+  if(!text&&!hasImg){S.imp={url,caption,error:"Could not read this link",hint:"The post may be private or deleted. Add a screenshot or paste the caption."};render();return;}
+  try{
+    const image=hasImg?await shrink(S.impImg):null;
+    const out=await api("/api/ai",{task:"import",url,caption:text,image});
+    const arr=Array.isArray(out&&out.places)?out.places:[];
+    S.imp={url,caption,note,found:arr.slice(0,6).map(x=>({id:x.id&&byId(String(x.id))?String(x.id):null,guess:String(x.guess||"Unknown place"),conf:Math.max(0,Math.min(100,Number(x.confidence)||0)),outside:!!x.outside,reason:String(x.reason||"")}))};
+  }catch(e){
+    if(e&&e.code==="ai_not_configured")S.aiOff=true;
+    if(e&&e.code==="rate_limited")S.imp={url,caption,error:"Too many requests right now",hint:"Wait a minute, then try again."};
+    else if(!text)S.imp={url,caption,error:"AI cannot read screenshots right now",hint:"Paste the caption instead. Simple name matching works without AI."};
+    else S.imp={url,caption,note,found:localMatch(url+"\n"+text)};
+  }
+  render();
+}
+function saveImport(){const ids=S.imp.found.map(x=>x.id).filter(id=>id&&byId(id));if(!ids.length){toast("Choose a place first");return;}ids.forEach(id=>S.saved.add(id));persistSaved();S.imp=null;pickShot(null);toast(ids.length+" place(s) saved");location.hash="saved";}
+
+// ---------- router ----------
+const TABS=[["home","Home","home"],["explore","Explore","compass"],["bot","AI Bot","spark"],["saved","Saved","bookmark"],["map","Map","map"]];
+function route(){return (location.hash||"#home").slice(1)||"home";}
+let lastRoute=null;
+function render(){
+  const r=route();const v=document.getElementById("view");
+  const html=r.startsWith("p-")?vPlace(r.slice(2)):({home:vHome,explore:vExplore,map:vMap,bot:vBot,saved:vSaved,import:vImport,pick:vPick}[r]||vHome)();
+  const active=document.activeElement&&document.activeElement.id;const sel=active&&document.activeElement.selectionStart;
+  v.innerHTML=html;
+  if(active){const el=document.getElementById(active);if(el&&el.tagName==="INPUT"&&r!=="bot"){el.focus();try{el.setSelectionRange(sel,sel)}catch(e){}}}
+  const top=r.startsWith("p-")?"explore":(r==="import"?"saved":(r==="pick"?"home":r));
+  document.getElementById("tabs").innerHTML=TABS.map(([k,l,i])=>k==="bot"?`<a class="tab ai" href="#bot" ${top===k?'aria-current="page"':""}><span class="ic">${ic(i)}</span>${l}</a>`:`<a class="tab" href="#${k}" ${top===k?'aria-current="page"':""}>${ic(i,top===k&&k==="saved")}${l}</a>`).join("");
+  if(r==="map"&&S.mapView==="kakao"&&CFG.KAKAO_JS_KEY)initKakao();
+  if(r!==lastRoute){lastRoute=r;window.scrollTo(0,0);}
+}
+function softRender(){const a=document.activeElement;if(a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA"||a.tagName==="SELECT"))return;render();}
+window.addEventListener("hashchange",render);
+boot();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
+</body>
+</html>

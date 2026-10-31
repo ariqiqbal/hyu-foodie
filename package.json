@@ -1,0 +1,8 @@
+{
+  "name": "hyu-foodie",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "HYU Foodie web app (static site + Vercel functions)",
+  "engines": { "node": ">=20" }
+}
