@@ -1,0 +1,45 @@
+[
+ {
+  "id": "grand-food",
+  "name": "Grand Food",
+  "ko": "",
+  "halal": false,
+  "naver": "https://naver.me/FBMsx6TQ",
+  "items": [
+   "Halal chicken (Brazil)",
+   "Halal meat",
+   "Halal sausage"
+  ],
+  "note": "Imported halal products. The chicken is usually halal certified in Brazil. Check the halal logo on each pack."
+ },
+ {
+  "id": "lucky-halin-mart",
+  "name": "Lucky Halin Mart",
+  "ko": "",
+  "halal": false,
+  "naver": "https://naver.me/5B0KD5BZ",
+  "items": [
+   "Halal chicken (Brazil)",
+   "Halal meat",
+   "Halal sausage",
+   "Halal ramen",
+   "Indomie (Indonesia)",
+   "Maggi Tom Yam (Malaysia)",
+   "Maggi Kari (Malaysia)"
+  ],
+  "note": "Imported halal products. The chicken is usually halal certified in Brazil. Check the halal logo on each pack."
+ },
+ {
+  "id": "halal-mart-3",
+  "name": "Halal Mart",
+  "ko": "",
+  "halal": false,
+  "naver": "https://naver.me/GKI0Ymav",
+  "items": [
+   "Halal chicken (Brazil)",
+   "Halal meat",
+   "Halal sausage"
+  ],
+  "note": "Imported halal products. The chicken is usually halal certified in Brazil. Check the halal logo on each pack."
+ }
+]

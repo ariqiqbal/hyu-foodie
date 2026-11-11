@@ -233,7 +233,7 @@ img{max-width:100%}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 // ---------- data: places.json (Kakao Map + HESS Food Guide for Muslims) ----------
-let PLACES=[],PMAP=new Map();
+let PLACES=[],PMAP=new Map(),MARTS=[];
 const DIET={halal:["Halal certified","b-halal","shield"],porkfree:["Pork-free options","b-pork","info"],halalc:["Maybe halal · check","b-gold","info"],veganc:["Not checked","b-none","info"],chinese:["Chinese","b-chinese","bowl"],none:["Not checked","b-none","info"]};
 // Vegetarian / vegan labels. "vg" = vegan (no animal products), "v" = vegetarian (may have egg or dairy). Not verified: staff check needed.
 const VEG={rayhon:["vg","Vegan dish: Falafel"],pizzaschool:["v","Vegetarian dish: Cheese Pizza"]};
@@ -266,6 +266,7 @@ function score(p){const t=tally(p.id);return (t.pick?1000:0)+t.y*3-t.n*2+({halal
 async function boot(){
   render();
   try{const r=await fetch("places.json");PLACES=await r.json();PMAP=new Map(PLACES.map(p=>[p.id,p]));}catch(e){toast("Could not load places. Check your connection.");}
+  try{const r=await fetch("marts.json");if(r.ok)MARTS=await r.json();}catch(e){}
   loadLocalSaved();render();
   if(!CFG.SUPABASE_URL||!CFG.SUPABASE_ANON_KEY)S.dbError="config.js has no Supabase URL or key";
   else if(!window.supabase)S.dbError="the Supabase library did not load (network or ad blocker)";
@@ -308,11 +309,13 @@ async function api(path,body){const r=await fetch(path,body?{method:"POST",heade
 
 // ---------- UI pieces ----------
 function badge(d){const [l,c,i]=DIET[d];return `<span class="badge ${c}">${ic(i)}${l}</span>`;}
+function survBadge(p){return p.surveyed?`<span class="badge b-halal" style="background:var(--green-soft);color:var(--green)">${ic("check")}Checked by team</span>`:"";}
 function pickBadge(t){return t.pick?`<span class="badge b-pick">${ic("award")}ERICA Pick · ${Math.round(t.pct*100)}%</span>`:"";}
-function thumb(p,cls="thumb"){return `<div class="${cls}">${p.img?`<img src="img/${p.img}.webp" alt="" loading="lazy">`:`<span class="cu">${esc(p.cuisine)}</span>`}</div>`;}
+const picSrc=p=>p.photo?p.photo:(p.img?`img/${p.img}.webp`:"");
+function thumb(p,cls="thumb"){return `<div class="${cls}">${picSrc(p)?`<img src="${picSrc(p)}" alt="" loading="lazy">`:`<span class="cu">${esc(p.cuisine)}</span>`}</div>`;}
 function voteLine(p){const t=tally(p.id);if(!t.t)return `<span class="small muted">No votes yet</span>`;return `<div class="row small"><div class="meter" style="flex:1"><i style="width:${Math.round(t.pct*100)}%"></i></div><b style="color:var(--gold)">${Math.round(t.pct*100)}% · ${t.t} vote${t.t>1?"s":""}</b></div>`;}
-function pcard(p){return `<a class="card pcard" href="#p-${p.id}">${thumb(p)}<div class="pinfo"><div class="row wrap" style="gap:6px">${badge(p.diet)}${vegBadge(p)}${pickBadge(tally(p.id))}</div><h3>${esc(p.name)}</h3>${p.ko&&p.ko!==p.name?`<span class="small" style="font-weight:700;margin-top:-3px">${esc(p.ko)}</span>`:""}<span class="small muted">${esc(p.cuisine)} · ${distTxt(p)}</span>${voteLine(p)}</div></a>`;}
-function vcard(p){return `<a class="card vcard" href="#p-${p.id}"><div class="ph">${p.img?`<img src="img/${p.img}.webp" alt="" loading="lazy">`:`<span class="cu" style="font-family:var(--display);font-weight:700">${esc(p.cuisine)}</span>`}</div><div class="bd"><div class="row wrap" style="gap:6px">${badge(p.diet)}${vegBadge(p)}</div><h3>${esc(p.name)}</h3>${p.ko&&p.ko!==p.name?`<span class="small" style="font-weight:700;margin-top:-4px">${esc(p.ko)}</span>`:""}${voteLine(p)}</div></a>`;}
+function pcard(p){return `<a class="card pcard" href="#p-${p.id}">${thumb(p)}<div class="pinfo"><div class="row wrap" style="gap:6px">${badge(p.diet)}${vegBadge(p)}${pickBadge(tally(p.id))}${survBadge(p)}</div><h3>${esc(p.name)}</h3>${p.ko&&p.ko!==p.name?`<span class="small" style="font-weight:700;margin-top:-3px">${esc(p.ko)}</span>`:""}<span class="small muted">${esc(p.cuisine)} · ${distTxt(p)}</span>${voteLine(p)}</div></a>`;}
+function vcard(p){return `<a class="card vcard" href="#p-${p.id}"><div class="ph">${picSrc(p)?`<img src="${picSrc(p)}" alt="" loading="lazy">`:`<span class="cu" style="font-family:var(--display);font-weight:700">${esc(p.cuisine)}</span>`}</div><div class="bd"><div class="row wrap" style="gap:6px">${badge(p.diet)}${vegBadge(p)}</div><h3>${esc(p.name)}</h3>${p.ko&&p.ko!==p.name?`<span class="small" style="font-weight:700;margin-top:-4px">${esc(p.ko)}</span>`:""}${voteLine(p)}</div></a>`;}
 function topbar(title,right=""){return `<div class="topbar"><a class="iconbtn" href="#home" onclick="if(history.length>1){history.back();return false}" aria-label="Back">${ic("back")}</a><h2 style="font-size:18px;flex:1;text-align:center">${esc(title)}</h2>${right||'<span style="width:42px"></span>'}</div>`;}
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2400);}
 function sorted(list){return [...list].sort((a,b)=>score(b)-score(a));}
@@ -342,7 +345,7 @@ function vHome(){
     const near=[...PLACES].filter(p=>p.m!=null&&p.group!=="Cafe").sort((a,b)=>a.m-b.m).slice(0,4);
     extra=`<div class="row between"><h2>Closest to campus</h2>${seeAll("all","near")}</div><div class="list">${near.map(pcard).join("")}</div>`;
   }
-  const hello=S.mode==="halal"?"Assalamu alaikum":"Hello, ERICA";
+  const hello="Hello, ERICA";
   return `
   <div class="topbar"><div class="loc"><small>Your location</small><b>${ic("pin")}Hanyang Univ. ERICA</b></div><a class="iconbtn" href="#saved" aria-label="Saved places" style="border:0">${ic("bookmark")}</a></div>
   <div><p class="hello">${hello}</p></div>
@@ -354,8 +357,9 @@ function vHome(){
   ${info}
   <div class="row between"><h2>${title}</h2>${seeAll("all")}</div>
   <div class="hscroll">${inMode.slice(0,6).map(vcard).join("")}</div>
+  ${S.mode!=="veg"?martSection():""}
   ${extra}
-  <div class="note">Data: ${PLACES.length} restaurants and cafes from Kakao Map within 1.5 km of ERICA. Halal status comes from the HESS Food Guide for Muslims. Pictures are AI-made sample photos of the food type, not photos of the shop.</div>`;
+  <div class="note">Data: ${PLACES.length} restaurants and cafes from Kakao Map within 500 m of ERICA, plus all halal places. Halal status comes from the HESS Food Guide for Muslims. Pictures marked "Sample photo" are AI-made, not photos of the shop.</div>`;
 }
 function vMe(){
   const nv=Object.keys(S.my).length;
@@ -395,8 +399,8 @@ function vPlace(id){
   const t=tally(p.id),mv=myVote(p.id),saved=S.saved.has(p.id);
   const need=Math.max(0,PICK_MIN-t.t);
   return `${topbar(p.name,`<button class="iconbtn" onclick="toggleSave('${p.id}')" aria-pressed="${saved}" aria-label="${saved?"Remove from saved":"Save"}" style="${saved?"background:var(--blue);color:#fff":""}">${ic("bookmark",saved)}</button>`)}
-  <div class="card dhero" style="position:relative">${p.img?`<img src="img/${p.img}.webp" alt="Sample photo of ${esc(p.cuisine)} food"><span class="badge b-none" style="position:absolute;left:10px;bottom:10px;background:var(--paper)">Sample photo · not the real shop</span>`:`<div style="text-align:center;padding:16px"><div class="cu">${esc(p.cuisine)}</div><p class="muted" style="margin-top:6px;font-weight:700">${esc(p.ko||"")}</p></div>`}</div>
-  <section class="row wrap" style="gap:6px">${badge(p.diet)}${vegBadge(p)}${pickBadge(t)}</section>
+  <div class="card dhero" style="position:relative">${picSrc(p)?`<img src="${picSrc(p)}" alt="${p.photo?"Food at "+esc(p.name):"Sample photo of "+esc(p.cuisine)+" food"}"><span class="badge b-none" style="position:absolute;left:10px;bottom:10px;background:var(--paper)">${p.photo?"Real photo · HYU Foodie team":"Sample photo · not the real shop"}</span>`:`<div style="text-align:center;padding:16px"><div class="cu">${esc(p.cuisine)}</div><p class="muted" style="margin-top:6px;font-weight:700">${esc(p.ko||"")}</p></div>`}</div>
+  <section class="row wrap" style="gap:6px">${badge(p.diet)}${vegBadge(p)}${pickBadge(t)}${survBadge(p)}</section>
   <div style="display:flex;flex-direction:column;gap:4px;margin-top:-6px"><h1>${esc(p.name)}</h1>${p.ko&&p.ko!==p.name?`<p style="font-size:17px;font-weight:800">${esc(p.ko)}</p>`:""}<p class="muted">${esc(p.cuisine)} · ${distTxt(p)}</p></div>
   ${p.note?`<div class="note" style="border-color:var(--orange);background:var(--orange-soft);color:var(--orange)">Staff tip: ${esc(p.note)}</div>`:""}
   ${DIETNOTE[p.diet]?`<div class="note" style="border-color:var(--muted);background:var(--paper);color:var(--ink)">${DIETNOTE[p.diet]}</div>`:""}
@@ -514,7 +518,7 @@ function chatHtml(m){
 function placeBrief(){return PLACES.map(p=>{const t=tally(p.id);return `${p.id}|${p.name}${p.ko&&p.ko!==p.name?" ("+p.ko+")":""}|${p.cuisine}|${DIET[p.diet][0]}|${p.m??"?"}m${(p.dishes||[]).length?"|dishes: "+p.dishes.join(", "):""}${p.note?"|tip: "+p.note:""}${t.t?"|votes "+t.y+"/"+t.t:""}`;}).join("\n");}
 function fallbackPicks(text){
   const t=text.toLowerCase();const rules=[[/spic|hot|chili/,["zaika","ilmi","alchon"]],[/meat|lamb|kebab|hungry|craving/,["saray","rayhon","thechicken"]],[/cheap|light|snack|quick|between/,["gimbapq","isaac","subway"]],[/comfort|tired|cold|warm|soup/,["zaika","tamna","saray"]],[/curry|indian/,["zaika"]]];
-  for(const [re,ids] of rules)if(re.test(t))return ids;return ["saray","zaika","rayhon"];
+  for(const [re,ids] of rules)if(re.test(t)){const ok=ids.filter(byId);if(ok.length)return ok;}return ["saray","zaika","rayhon"].filter(byId);
 }
 async function askBot(text){
   if(S.botBusy)return;S.chat.push({role:"user",text});S.botBusy=true;S.chat.push({role:"bot",text:"Thinking..."});render();
@@ -526,7 +530,7 @@ async function askBot(text){
   }catch(e){
     if(e&&e.code==="ai_not_configured")S.aiOff=true;
     slot.text=(e&&e.code==="rate_limited")?"Too many questions right now. Here are quick picks:":"Here are quick picks for you:";
-    slot.picks=fallbackPicks(text).map(id=>({id,why:byId(id).dishes[0]+" is popular here."}));
+    slot.picks=fallbackPicks(text).map(id=>({id,why:((byId(id).dishes||[])[0]||byId(id).cuisine)+" is popular here."}));
   }finally{S.botBusy=false;render();const c=document.getElementById("m");if(c)c.focus();}
 }
 
@@ -597,17 +601,42 @@ async function runImport(url,caption){
 }
 function saveImport(){const ids=S.imp.found.map(x=>x.id).filter(id=>id&&byId(id));if(!ids.length){toast("Choose a place first");return;}ids.forEach(id=>S.saved.add(id));persistSaved();S.imp=null;pickShot(null);toast(ids.length+" place(s) saved");location.hash="saved";}
 
+
+// ---------- halal marts (data: marts.json) ----------
+const mDist=m=>m.m!=null?`${m.m} m · ${m.w||Math.max(1,Math.round(m.m/75))} min walk`:"near ERICA";
+const martPic=m=>m.photo||"img/grocery.webp";
+function mcard(m){return `<a class="card pcard" href="#m-${esc(m.id)}"><div class="thumb"><img src="${esc(martPic(m))}" alt="" loading="lazy"></div><div class="pinfo"><div class="row wrap" style="gap:6px">${m.halal?badge("halal"):`<span class="badge b-pork">${ic("bag")}Halal items</span>`}</div><h3>${esc(m.name)}</h3>${m.ko?`<span class="small" style="font-weight:700;margin-top:-3px">${esc(m.ko)}</span>`:""}<span class="small muted">${mDist(m)}${m.hours?" · "+esc(m.hours):""}</span>${(m.items||[]).length?`<span class="small muted">${m.items.slice(0,4).map(esc).join(" · ")}</span>`:""}</div></a>`;}
+function martSection(){return `<div class="row between"><h2>Halal marts nearby</h2>${MARTS.length?`<a href="#marts" class="small" style="color:var(--blue);font-weight:800">See all</a>`:""}</div>
+  ${MARTS.length?`<div class="list">${MARTS.slice(0,3).map(mcard).join("")}</div>`:`<div class="card empty"><span class="mascot">${ic("bag")}</span><h3>Coming soon</h3><p class="small muted">Our team is adding shops that sell halal meat, spices and snacks near ERICA.</p></div>`}`;}
+function vMarts(){return `${topbar("Halal marts")}<p class="muted">Shops near ERICA that sell halal groceries: meat, spices, rice, noodles and snacks.</p><div class="list">${MARTS.map(mcard).join("")||`<div class="card empty"><h3>Coming soon</h3></div>`}</div>`;}
+function vMart(id){
+  const m=MARTS.find(x=>x.id===id);if(!m)return vMarts();
+  const nav="https://map.naver.com/p/search/"+encodeURIComponent((m.ko||m.name)+" "+(m.address||""));
+  return `${topbar(m.name)}
+  <div class="card dhero" style="position:relative"><img src="${esc(martPic(m))}" alt="${esc(m.name)}">${m.photo?"":`<span class="badge b-none" style="position:absolute;left:10px;bottom:10px;background:var(--paper)">Sample photo · not the real shop</span>`}</div>
+  <section class="row wrap" style="gap:6px">${m.halal?badge("halal"):`<span class="badge b-pork">${ic("bag")}Halal items</span>`}</section>
+  <div style="display:flex;flex-direction:column;gap:4px;margin-top:-6px"><h1>${esc(m.name)}</h1>${m.ko?`<p style="font-size:17px;font-weight:800">${esc(m.ko)}</p>`:""}<p class="muted">${mDist(m)}</p></div>
+  ${m.note?`<div class="note" style="background:var(--orange-soft);color:var(--orange)">Tip: ${esc(m.note)}</div>`:""}
+  ${(m.items||[]).length?`<section class="card pad"><h3 style="margin-bottom:8px">Halal items available</h3><div class="row wrap" style="gap:6px">${m.items.map(i=>`<span class="badge b-halal">${esc(i)}</span>`).join("")}</div></section>`:""}
+  <section class="card pad"><h3 style="margin-bottom:4px">Store details</h3><dl class="info" style="margin:0">
+    ${m.address?`<div><dt>Address</dt><dd>${esc(m.address)}</dd></div>`:""}
+    ${m.hours?`<div><dt>Hours</dt><dd>${esc(m.hours)}</dd></div>`:""}
+    ${m.phone?`<div><dt>Phone</dt><dd><span style="user-select:all">${esc(m.phone)}</span></dd></div>`:""}
+    <div><dt>Distance</dt><dd>${m.m!=null?`${m.m} m from ERICA campus`:"Near ERICA"}</dd></div>
+  </dl></section>
+  <a class="btn naver block" href="${nav}" target="_blank" rel="noopener">${ic("nav")}Open in Naver Map</a>`;
+}
 // ---------- router ----------
 const TABS=[["home","Home","home"],["explore","Explore","compass"],["bot","AI Bot","spark"],["saved","Saved","bookmark"],["me","Me","user"]];
 function route(){return (location.hash||"#home").slice(1)||"home";}
 let lastRoute=null;
 function render(){
   const r=route();const v=document.getElementById("view");
-  const html=r.startsWith("p-")?vPlace(r.slice(2)):({home:vHome,explore:vExplore,bot:vBot,saved:vSaved,me:vMe}[r]||vHome)();
+  const html=r.startsWith("p-")?vPlace(r.slice(2)):r.startsWith("m-")?vMart(r.slice(2)):r==="marts"?vMarts():({home:vHome,explore:vExplore,bot:vBot,saved:vSaved,me:vMe}[r]||vHome)();
   const active=document.activeElement&&document.activeElement.id;const sel=active&&document.activeElement.selectionStart;
   v.innerHTML=html;
   if(active){const el=document.getElementById(active);if(el&&el.tagName==="INPUT"&&r!=="bot"){el.focus();try{el.setSelectionRange(sel,sel)}catch(e){}}}
-  const top=r.startsWith("p-")?"explore":(["home","explore","bot","saved","me"].includes(r)?r:"home");
+  const top=r.startsWith("p-")?"explore":(r==="marts"||r.startsWith("m-"))?"home":(["home","explore","bot","saved","me"].includes(r)?r:"home");
   document.getElementById("tabs").innerHTML=TABS.map(([k,l,i])=>k==="bot"?`<a class="tab ai" href="#bot" ${top===k?'aria-current="page"':""}><span class="ic">${ic(i)}</span>${l}</a>`:`<a class="tab" href="#${k}" ${top===k?'aria-current="page"':""}>${ic(i,top===k&&k==="saved")}${l}</a>`).join("");
   if(r==="map"&&S.mapView==="kakao"&&CFG.KAKAO_JS_KEY)initKakao();
   if(r!==lastRoute){lastRoute=r;window.scrollTo(0,0);}
