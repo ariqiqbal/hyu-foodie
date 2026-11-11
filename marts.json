@@ -2,7 +2,7 @@
  {
   "id": "grand-food",
   "name": "Grand Food",
-  "ko": "",
+  "ko": "그랜드푸드",
   "halal": false,
   "naver": "https://naver.me/FBMsx6TQ",
   "items": [
@@ -10,12 +10,13 @@
    "Halal meat",
    "Halal sausage"
   ],
-  "note": "Imported halal products. The chicken is usually halal certified in Brazil. Check the halal logo on each pack."
+  "note": "Russian grocery. It also sells alcohol. The chicken is usually halal certified in Brazil. Check the halal logo on each pack.",
+  "photo": "photos/grand-food.jpg"
  },
  {
-  "id": "lucky-halin-mart",
-  "name": "Lucky Halin Mart",
-  "ko": "",
+  "id": "lucky-discount-mart",
+  "name": "Lucky Discount Mart",
+  "ko": "럭키할인마트",
   "halal": false,
   "naver": "https://naver.me/5B0KD5BZ",
   "items": [
@@ -27,11 +28,13 @@
    "Maggi Tom Yam (Malaysia)",
    "Maggi Kari (Malaysia)"
   ],
-  "note": "Imported halal products. The chicken is usually halal certified in Brazil. Check the halal logo on each pack."
+  "note": "Imported halal products. The chicken is usually halal certified in Brazil. Check the halal logo on each pack.",
+  "phone": "031-417-9133",
+  "photo": "photos/lucky-discount-mart.jpg"
  },
  {
-  "id": "halal-mart-3",
-  "name": "Halal Mart",
+  "id": "melnitsa",
+  "name": "Melnitsa",
   "ko": "",
   "halal": false,
   "naver": "https://naver.me/GKI0Ymav",
@@ -40,6 +43,7 @@
    "Halal meat",
    "Halal sausage"
   ],
-  "note": "Imported halal products. The chicken is usually halal certified in Brazil. Check the halal logo on each pack."
+  "note": "Russian grocery. The chicken is usually halal certified in Brazil. Check the halal logo on each pack.",
+  "photo": "photos/melnitsa.jpg"
  }
 ]
