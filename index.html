@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0E4A84">
+<meta name="theme-color" content="#F4F1E8">
 <meta name="description" content="HYU Foodie: halal, pork-free, vegan and Chinese food near Hanyang University ERICA, with student votes and an AI food bot.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
@@ -175,6 +175,50 @@ img{max-width:100%}
 .thumb,.vcard .ph,.dhero{border-color:transparent}
 .tab.ai .ic{border:0;box-shadow:0 4px 12px rgba(229,124,20,.4)}
 .note{border:0}
+/* Grab-style home: header band, 3 interface modes, category tiles */
+.ghead{margin:-10px calc(-1*max(16px,env(safe-area-inset-right,0px))) 0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:14px 16px 20px;background:linear-gradient(180deg,#0A3A69,#0E4A84);border-radius:0 0 22px 22px;display:flex;flex-direction:column;gap:12px;color:#fff}
+.ghead .search{border:0;box-shadow:none;min-height:46px}
+.ghead .brand{font-weight:800;font-size:18px;letter-spacing:-.01em}
+.ghead .brand span{font-weight:600;font-size:12px;color:#CFE3F7;display:block}
+.modes3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mode3{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px 10px;border-radius:16px;border:2px solid transparent;background:var(--paper);box-shadow:var(--shadow-sm);font-weight:800;font-size:13px;text-align:center;position:relative}
+.mode3 small{font-weight:600;font-size:11px;color:var(--muted);line-height:1.25}
+.mode3 img{width:56px;height:56px;border-radius:50%;object-fit:cover}
+.mode3[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.mode3[aria-pressed="true"]::after{content:"✓";position:absolute;top:6px;right:8px;width:18px;height:18px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;display:grid;place-items:center}
+.cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.cat{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:16px;background:var(--blue-soft);font-weight:700;font-size:12px;text-decoration:none;color:var(--ink);text-align:center}
+.cat img,.cat .all{width:48px;height:48px;border-radius:14px;object-fit:cover}
+.cat .all{display:grid;place-items:center;background:var(--paper);color:var(--blue)}
+.cat .all svg{width:22px;height:22px}
+.explain{display:flex;flex-direction:column;gap:10px}
+.explain p{line-height:1.6}
+.legend{display:flex;flex-direction:column;gap:8px}
+.legend div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center;font-size:12px}
+.b-vg{background:var(--green);color:#fff}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;border-radius:999px;padding:8px 4px;font-weight:700;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--blue);color:#fff}
+/* v4: first design (Option A) look — cream background, location header, AI Bot tab */
+:root{--cream:#F4F1E8}
+.card{border-color:transparent}
+.chip{border-color:transparent;box-shadow:var(--shadow-sm)}
+.loc{display:flex;flex-direction:column;gap:2px}
+.loc small{font-size:12px;color:var(--muted);font-weight:600}
+.loc b{display:flex;align-items:center;gap:4px;font-size:16px;font-weight:800}
+.loc b svg{width:16px;height:16px;color:var(--blue)}
+.hello{font-size:15px;color:var(--muted);font-weight:600;margin-bottom:-10px}
+.hsearch{display:flex;gap:10px;align-items:center}
+.hsearch .search{flex:1;border-color:transparent}
+.sqbtn{width:50px;height:50px;border-radius:14px;background:var(--blue);color:#fff;display:grid;place-items:center;flex:none}
+.sqbtn svg{width:20px;height:20px}
+.vcard{width:240px}
+.vcard .ph{height:140px}
+.tabbar{border-top:0;box-shadow:0 -4px 16px rgba(19,35,58,.06);border-radius:22px 22px 0 0}
+.tabbar nav{grid-template-columns:repeat(5,1fr)}
+.melist{display:flex;flex-direction:column}
+.melist a,.melist div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit;font-weight:700}
+.melist>:last-child{border-bottom:0}
 </style>
 </head>
 <body>
@@ -190,14 +234,21 @@ img{max-width:100%}
 <script>
 // ---------- data: places.json (Kakao Map + HESS Food Guide for Muslims) ----------
 let PLACES=[],PMAP=new Map();
-const DIET={halal:["Halal certified","b-halal","shield"],porkfree:["Pork-free options","b-pork","info"],halalc:["Maybe halal · check","b-gold","info"],veganc:["Salad · vegan options?","b-vegan","leaf"],chinese:["Chinese","b-chinese","bowl"],none:["Not checked","b-none","info"]};
-const FILTERS=[["all","All"],["halal","Halal"],["porkfree","Pork-free"],["chinese","Chinese"],["vegan","Vegan & salad"],["Korean","Korean"],["Cafe","Cafe"],["Western","Western"],["Japanese","Japanese"],["Chicken","Chicken"],["Korean street food","Street food"],["Snacks & dessert","Dessert"],["Asian","Asian"]];
-function match(p,f){if(f==="all")return true;if(f==="halal")return p.diet==="halal"||p.diet==="halalc";if(f==="porkfree")return p.diet==="porkfree";if(f==="vegan")return p.diet==="veganc"||p.group==="Salad";if(f==="chinese")return p.diet==="chinese";return p.group===f;}
+const DIET={halal:["Halal certified","b-halal","shield"],porkfree:["Pork-free options","b-pork","info"],halalc:["Maybe halal · check","b-gold","info"],veganc:["Not checked","b-none","info"],chinese:["Chinese","b-chinese","bowl"],none:["Not checked","b-none","info"]};
+// Vegetarian / vegan labels. "vg" = vegan (no animal products), "v" = vegetarian (may have egg or dairy). Not verified: staff check needed.
+const VEG={rayhon:["vg","Vegan dish: Falafel"],pizzaschool:["v","Vegetarian dish: Cheese Pizza"]};
+function vegOf(p){if(VEG[p.id])return VEG[p.id];if(p.diet==="veganc"||p.group==="Salad")return ["vg","Vegan options · check"];return null;}
+function vegBadge(p){const v=vegOf(p);return v?`<span class="badge ${v[0]==="vg"?"b-vg":"b-vegan"}">${ic("leaf")}${v[1]}</span>`:"";}
+const MODES={general:["General","All restaurants","hansang"],halal:["Halal","Halal & pork-free","kebab"],veg:["Vegetarian","Vegetarian & vegan","vegan"]};
+const MFILTERS={general:[["all","All"],["pick","ERICA Pick"],["Korean","Korean"],["Cafe","Cafe"],["chinese","Chinese"],["Japanese","Japanese"],["Chicken","Chicken"],["Western","Western"],["Korean street food","Street food"],["Snacks & dessert","Dessert"],["Asian","Asian"]],halal:[["all","All"],["pick","ERICA Pick"],["halal","Halal certified"],["porkfree","Pork-free options"]],veg:[["all","All"],["pick","ERICA Pick"]]};
+function modeMatch(p){if(S.mode==="halal")return ["halal","halalc","porkfree"].includes(p.diet);if(S.mode==="veg")return !!vegOf(p);return true;}
+function setMode(m){S.mode=m;S.filter="all";S.limit=30;try{localStorage.setItem("hyu-mode",m);}catch(e){}render();}
+function match(p,f){if(f==="all")return true;if(f==="pick")return tally(p.id).t>0;if(f==="halal")return p.diet==="halal"||p.diet==="halalc";if(f==="porkfree")return p.diet==="porkfree";if(f==="chinese")return p.diet==="chinese";return p.group===f;}
 const distTxt=p=>p.m!=null?`${p.m} m · ${p.w} min walk`:"near ERICA";
 const PICK_MIN=20, PICK_PCT=0.7;
 
 // ---------- icons ----------
-const I={home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',compass:'<circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/>',spark:'<path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/><path d="M19 3v4M21 5h-4"/>',bookmark:'<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',map:'<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',back:'<path d="m15 18-6-6 6-6"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',leaf:'<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path d="M2 21c0-3 1.9-5.4 5.1-6C9.5 14.5 12 13 13 12"/>',bowl:'<path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M7 7c1-2 3-2 4 0s3 2 4 0"/>',bag:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/>',link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',award:'<circle cx="12" cy="8" r="6"/><path d="M15.5 12.9 17 22l-5-3-5 3 1.5-9.1"/>',up:'<path d="M7 10v12M15 5.9 14 10h5.8a2 2 0 0 1 1.9 2.6l-2.3 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.8a2 2 0 0 0 1.8-1.1L12 2a3.1 3.1 0 0 1 3 3.9Z"/>',down:'<path d="M17 14V2M9 18.1 10 14H4.2a2 2 0 0 1-1.9-2.6l2.3-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.8a2 2 0 0 0-1.8 1.1L12 22a3.1 3.1 0 0 1-3-3.9Z"/>',nav:'<path d="m3 11 19-9-9 19-2-8z"/>',copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',walk:'<circle cx="13" cy="4" r="2"/><path d="m9 20 3-6 3 2v6M7 12l3-4 4 1 3 3M10 8l-2 6"/>',bus:'<rect x="4" y="3" width="16" height="15" rx="2"/><path d="M4 11h16M8 21v-3M16 21v-3"/>',car:'<path d="M5 17h14v-5l-2-5H7l-2 5z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/>',send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',check:'<path d="M20 6 9 17l-5-5"/>',camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'};
+const I={home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',compass:'<circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/>',spark:'<path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/><path d="M19 3v4M21 5h-4"/>',bookmark:'<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',map:'<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',back:'<path d="m15 18-6-6 6-6"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',leaf:'<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path d="M2 21c0-3 1.9-5.4 5.1-6C9.5 14.5 12 13 13 12"/>',bowl:'<path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M7 7c1-2 3-2 4 0s3 2 4 0"/>',bag:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/>',link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',award:'<circle cx="12" cy="8" r="6"/><path d="M15.5 12.9 17 22l-5-3-5 3 1.5-9.1"/>',up:'<path d="M7 10v12M15 5.9 14 10h5.8a2 2 0 0 1 1.9 2.6l-2.3 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.8a2 2 0 0 0 1.8-1.1L12 2a3.1 3.1 0 0 1 3 3.9Z"/>',down:'<path d="M17 14V2M9 18.1 10 14H4.2a2 2 0 0 1-1.9-2.6l2.3-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.8a2 2 0 0 0-1.8 1.1L12 22a3.1 3.1 0 0 1-3-3.9Z"/>',nav:'<path d="m3 11 19-9-9 19-2-8z"/>',copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',walk:'<circle cx="13" cy="4" r="2"/><path d="m9 20 3-6 3 2v6M7 12l3-4 4 1 3 3M10 8l-2 6"/>',bus:'<rect x="4" y="3" width="16" height="15" rx="2"/><path d="M4 11h16M8 21v-3M16 21v-3"/>',car:'<path d="M5 17h14v-5l-2-5H7l-2 5z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/>',send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',check:'<path d="M20 6 9 17l-5-5"/>',grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',chevD:'<path d="m6 9 6 6 6-6"/>',chevR:'<path d="m9 18 6-6-6-6"/>',bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',filter:'<path d="M3 6h18M7 12h10M10 18h4"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'};
 const ic=(n,fill)=>`<svg viewBox="0 0 24 24" fill="${fill?'currentColor':'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const byId=id=>PMAP.get(id);
@@ -206,7 +257,7 @@ const kakaoUrl=p=>p.k?"https://place.map.kakao.com/"+p.k:"https://map.kakao.com/
 
 // ---------- state ----------
 const CFG=window.HYU_CONFIG||{};
-const S={sb:null,uid:null,online:false,totals:{},my:{},votesLoaded:false,saved:new Set(),filter:"all",q:"",sort:"top",limit:30,zoom:1,mapView:(CFG.KAKAO_JS_KEY?"kakao":"real"),chat:[],botBusy:false,imp:null,impImg:null,impImgUrl:null,mapSel:null,canVote:true,aiOff:false};
+const S={mode:(()=>{try{const m=localStorage.getItem("hyu-mode");return ["general","halal","veg"].includes(m)?m:"general";}catch(e){return "general";}})(),sb:null,uid:null,online:false,totals:{},my:{},votesLoaded:false,saved:new Set(),filter:"all",q:"",sort:"top",limit:30,zoom:1,mapView:(CFG.KAKAO_JS_KEY?"kakao":"real"),chat:[],botBusy:false,imp:null,impImg:null,impImgUrl:null,mapSel:null,canVote:true,aiOff:false};
 function tally(id){const v=S.totals[id]||[0,0];const y=v[0],n=v[1],t=y+n;return {y,n,t,pct:t?y/t:0,pick:t>=PICK_MIN&&y/t>=PICK_PCT&&y>n};}
 const myVote=id=>S.my[id]||0;
 function score(p){const t=tally(p.id);return (t.pick?1000:0)+t.y*3-t.n*2+({halal:40,porkfree:20,halalc:10}[p.diet]||0)-(p.m??900)/100;}
@@ -260,53 +311,81 @@ function badge(d){const [l,c,i]=DIET[d];return `<span class="badge ${c}">${ic(i)
 function pickBadge(t){return t.pick?`<span class="badge b-pick">${ic("award")}ERICA Pick · ${Math.round(t.pct*100)}%</span>`:"";}
 function thumb(p,cls="thumb"){return `<div class="${cls}">${p.img?`<img src="img/${p.img}.webp" alt="" loading="lazy">`:`<span class="cu">${esc(p.cuisine)}</span>`}</div>`;}
 function voteLine(p){const t=tally(p.id);if(!t.t)return `<span class="small muted">No votes yet</span>`;return `<div class="row small"><div class="meter" style="flex:1"><i style="width:${Math.round(t.pct*100)}%"></i></div><b style="color:var(--gold)">${Math.round(t.pct*100)}% · ${t.t} vote${t.t>1?"s":""}</b></div>`;}
-function pcard(p){return `<a class="card pcard" href="#p-${p.id}">${thumb(p)}<div class="pinfo"><div class="row wrap" style="gap:6px">${badge(p.diet)}${pickBadge(tally(p.id))}</div><h3>${esc(p.name)}</h3>${p.ko&&p.ko!==p.name?`<span class="small" style="font-weight:700;margin-top:-3px">${esc(p.ko)}</span>`:""}<span class="small muted">${esc(p.cuisine)} · ${distTxt(p)}</span>${voteLine(p)}</div></a>`;}
-function vcard(p){return `<a class="card vcard" href="#p-${p.id}"><div class="ph">${p.img?`<img src="img/${p.img}.webp" alt="" loading="lazy">`:`<span class="cu" style="font-family:var(--display);font-weight:700">${esc(p.cuisine)}</span>`}</div><div class="bd"><div class="row wrap" style="gap:6px">${badge(p.diet)}</div><h3>${esc(p.name)}</h3>${p.ko&&p.ko!==p.name?`<span class="small" style="font-weight:700;margin-top:-4px">${esc(p.ko)}</span>`:""}${voteLine(p)}</div></a>`;}
+function pcard(p){return `<a class="card pcard" href="#p-${p.id}">${thumb(p)}<div class="pinfo"><div class="row wrap" style="gap:6px">${badge(p.diet)}${vegBadge(p)}${pickBadge(tally(p.id))}</div><h3>${esc(p.name)}</h3>${p.ko&&p.ko!==p.name?`<span class="small" style="font-weight:700;margin-top:-3px">${esc(p.ko)}</span>`:""}<span class="small muted">${esc(p.cuisine)} · ${distTxt(p)}</span>${voteLine(p)}</div></a>`;}
+function vcard(p){return `<a class="card vcard" href="#p-${p.id}"><div class="ph">${p.img?`<img src="img/${p.img}.webp" alt="" loading="lazy">`:`<span class="cu" style="font-family:var(--display);font-weight:700">${esc(p.cuisine)}</span>`}</div><div class="bd"><div class="row wrap" style="gap:6px">${badge(p.diet)}${vegBadge(p)}</div><h3>${esc(p.name)}</h3>${p.ko&&p.ko!==p.name?`<span class="small" style="font-weight:700;margin-top:-4px">${esc(p.ko)}</span>`:""}${voteLine(p)}</div></a>`;}
 function topbar(title,right=""){return `<div class="topbar"><a class="iconbtn" href="#home" onclick="if(history.length>1){history.back();return false}" aria-label="Back">${ic("back")}</a><h2 style="font-size:18px;flex:1;text-align:center">${esc(title)}</h2>${right||'<span style="width:42px"></span>'}</div>`;}
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2400);}
 function sorted(list){return [...list].sort((a,b)=>score(b)-score(a));}
 
 // ---------- views ----------
+function modePicker(){return `<div class="modes3" role="group" aria-label="Choose your interface">${Object.entries(MODES).map(([k,[l,d,img]])=>`<button class="mode3" aria-pressed="${S.mode===k}" onclick="setMode('${k}')"><img src="img/${img}.webp" alt="">${l}<small>${d}</small></button>`).join("")}</div>`;}
+function cat(l,f,img){return `<a class="cat" href="#explore" onclick="S.filter='${f}';S.limit=30;S.sort='top'">${img?`<img src="img/${img}.webp" alt="">`:`<span class="all">${ic("grid")}</span>`}${l}</a>`;}
+function seeAll(f,sort){return `<a href="#explore" onclick="S.filter='${f}';S.sort='${sort||"top"}';S.limit=30" class="small" style="color:var(--blue);font-weight:800">See all</a>`;}
+function hchips(){const fl=MFILTERS[S.mode].filter(([k])=>k!=="all"&&k!=="pick");if(!fl.length)return "";return `<div class="chips" role="group" aria-label="Quick filters"><a class="chip" href="#explore" style="background:var(--blue);color:#fff;text-decoration:none" onclick="S.filter='all';S.limit=30">All</a>${fl.slice(0,8).map(([k,l])=>`<a class="chip" href="#explore" style="text-decoration:none;color:var(--ink)" onclick="S.filter='${k}';S.limit=30;S.sort='top'">${l}</a>`).join("")}</div>`;}
 function vHome(){
-  const picks=sorted(PLACES).slice(0,6);
-  const near=[...PLACES].filter(p=>p.m!=null&&p.group!=="Cafe").sort((a,b)=>a.m-b.m).slice(0,4);
+  const inMode=sorted(PLACES.filter(modeMatch));
+  let info="",title="Popular near ERICA",extra="";
+  if(S.mode==="halal"){
+    title="Halal near ERICA";
+    info=`<section class="card pad explain"><div class="row" style="gap:6px;color:var(--blue)">${ic("info").replace("<svg",'<svg style="width:18px;height:18px"')}<h2 style="color:var(--ink)">What is halal?</h2></div>
+      <p>Halal means anything that is permissible or allowed in Islam. For food to be halal, it must contain permissible ingredients, be free from prohibited substances such as pork and alcohol, and follow Islamic guidelines in its preparation. Halal slaughtering also emphasizes cleanliness, kindness, and minimizing the animal's suffering, making it a more compassionate way of slaughtering animals.</p>
+      <div class="legend"><div><span>${badge("halal")}</span><span class="muted">Listed as halal in the HESS Food Guide for Muslims.</span></div><div><span>${badge("porkfree")}</span><span class="muted">Not halal certified. Some dishes have no pork. Ask the staff.</span></div><div><span>${badge("halalc")}</span><span class="muted">The name suggests halal food. Not verified yet.</span></div></div></section>`;
+  }else if(S.mode==="veg"){
+    title="Vegetarian-friendly near ERICA";
+    info=`<section class="card pad explain"><div class="row" style="gap:6px;color:var(--green)">${ic("info").replace("<svg",'<svg style="width:18px;height:18px"')}<h2 style="color:var(--ink)">Vegetarian and vegan</h2></div>
+      <p><b>Vegetarian</b> food has no meat, poultry or seafood. It can include eggs, milk and cheese.</p>
+      <p><b>Vegan</b> food has no animal products at all: no meat, seafood, eggs, dairy or honey.</p>
+      <p class="muted small">In Korea, many soups, kimchi and sauces use anchovy stock, fish sauce or meat broth. Ask the staff before you order.</p>
+      <div class="legend"><div><span><span class="badge b-vegan">${ic("leaf")}Vegetarian</span></span><span class="muted">Light green label: no meat or seafood. May have egg or dairy.</span></div><div><span><span class="badge b-vg">${ic("leaf")}Vegan</span></span><span class="muted">Dark green label: no animal products.</span></div></div></section>`;
+    extra=`<div class="note">Only ${inMode.length} places have a vegetarian or vegan label now. The labels are a first guess from menus and are not verified.</div>`;
+  }else{
+    const near=[...PLACES].filter(p=>p.m!=null&&p.group!=="Cafe").sort((a,b)=>a.m-b.m).slice(0,4);
+    extra=`<div class="row between"><h2>Closest to campus</h2>${seeAll("all","near")}</div><div class="list">${near.map(pcard).join("")}</div>`;
+  }
+  const hello=S.mode==="halal"?"Assalamu alaikum":"Hello, ERICA";
   return `
-  <div class="topbar"><div class="row"><span class="iconbtn" aria-hidden="true">${ic("user")}</span><h2>Hi there!</h2></div><a class="iconbtn" href="#import" aria-label="Import from social media">${ic("link")}</a></div>
-  <section class="card hero" aria-label="Your community">
-    <div class="row between" style="align-items:flex-start"><div><div class="eyebrow">Hanyang University ERICA</div><h1>What do you feel like eating today?</h1></div><span class="pill-dark" style="background:rgba(255,255,255,.18)">Beta</span></div>
-    <p>${PLACES.length} places within 1.5 km. Halal and pork-free labels, student votes, and an AI helper.</p>
-    <a class="btn" href="#bot">${ic("spark")}Ask AI what to eat</a>
-  </section>
-  <form class="search" onsubmit="event.preventDefault();S.q=this.q.value;S.limit=30;location.hash='explore'"><label class="sr" for="q">Search</label>${ic("search")}<input id="q" name="q" placeholder='Search "kebab", "마라탕", "curry"' autocomplete="off"></form>
-  <div class="tiles">
-    ${tile("Halal","explore","shield","var(--blue-soft)","var(--blue)","halal")}
-    ${tile("Pork-free","explore","info","var(--orange-soft)","var(--orange)","porkfree")}
-    ${tile("Vegan","explore","leaf","var(--green-soft)","var(--green)","vegan")}
-    ${tile("Chinese","explore","bowl","var(--red-soft)","var(--red)","chinese")}
-    ${tile("Map","map","map","var(--sky)","var(--blue)")}
-    ${tile("Import","import","link","var(--blue-soft)","var(--blue)")}
-    ${tile("ERICA Pick","pick","award","var(--gold-soft)","var(--gold)")}
-    ${tile("AI Bot","bot","spark","var(--orange-soft)","var(--orange)")}
-  </div>
-  <div class="row between"><h2>Top for students</h2><a href="#pick" class="small" style="color:var(--blue);font-weight:800">Ranking</a></div>
-  <div class="hscroll">${picks.map(vcard).join("")}</div>
-  <div class="row between"><h2>Closest to campus</h2><a href="#explore" onclick="S.filter='all';S.sort='near';S.limit=30" class="small" style="color:var(--blue);font-weight:800">See all</a></div>
-  <div class="list">${near.map(pcard).join("")}</div>
-  <div class="note">Beta data: ${PLACES.length} restaurants and cafes from Kakao Map within 1.5 km of ERICA (bars left out). 12 are checked by the HESS Food Guide for Muslims. "Not checked" means nobody has checked halal status yet. Pictures are sample photos of the food type (AI-made), not photos of the shop.</div>`;
+  <div class="topbar"><div class="loc"><small>Your location</small><b>${ic("pin")}Hanyang Univ. ERICA</b></div><a class="iconbtn" href="#saved" aria-label="Saved places" style="border:0">${ic("bookmark")}</a></div>
+  <div><p class="hello">${hello}</p></div>
+  <h1 style="font-size:28px">What do you feel<br>like eating today?</h1>
+  <div class="hsearch"><form class="search" onsubmit="event.preventDefault();S.q=this.q.value;S.limit=30;location.hash='explore'"><label class="sr" for="q">Search</label>${ic("search")}<input id="q" name="q" placeholder="Search food, restaurant, 한글 OK" autocomplete="off"></form><a class="sqbtn" href="#explore" aria-label="Filters">${ic("filter")}</a></div>
+  ${hchips()}
+  <h2 style="margin-bottom:-4px">Choose your interface</h2>
+  ${modePicker()}
+  ${info}
+  <div class="row between"><h2>${title}</h2>${seeAll("all")}</div>
+  <div class="hscroll">${inMode.slice(0,6).map(vcard).join("")}</div>
+  ${extra}
+  <div class="note">Data: ${PLACES.length} restaurants and cafes from Kakao Map within 1.5 km of ERICA. Halal status comes from the HESS Food Guide for Muslims. Pictures are AI-made sample photos of the food type, not photos of the shop.</div>`;
+}
+function vMe(){
+  const nv=Object.keys(S.my).length;
+  return `<div class="topbar"><h1 style="font-size:26px">Me</h1><span></span></div>
+  <section class="card pad" style="display:flex;flex-direction:column;gap:12px"><h3>My interface</h3>${modePicker()}</section>
+  <section class="card pad"><div class="melist">
+    <a href="#saved"><span>Saved places</span><span class="muted">${S.saved.size} ${ic("chevR").replace("<svg",'<svg style="width:16px;height:16px;vertical-align:-3px"')}</span></a>
+    <div><span>My votes</span><span class="muted">${nv}</span></div>
+    <a href="#explore" onclick="S.filter='pick';S.limit=30"><span>ERICA Pick ranking</span><span class="muted">${ic("chevR").replace("<svg",'<svg style="width:16px;height:16px;vertical-align:-3px"')}</span></a>
+    <div><span>Account</span><span class="muted small">${S.online?"Anonymous · votes synced":"This phone only"}</span></div>
+  </div></section>
+  <div class="note">HYU Foodie is a student project for the Hanyang ERICA community (AI+X). Halal labels come from the HESS Food Guide for Muslims. Always ask the staff when you are not sure.</div>`;
 }
 function tile(l,h,i,bg,fg,f){return `<a class="tile" href="#${h}" ${f?`onclick="S.filter='${f}';S.limit=30;S.sort='top'"`:""}><span class="ic" style="background:${bg};color:${fg}">${ic(i)}</span>${l}</a>`;}
-function filtered(){const q=S.q.trim().toLowerCase();let l=PLACES.filter(p=>match(p,S.filter));if(q)l=l.filter(p=>(p.name+" "+(p.ko||"")+" "+p.cuisine+" "+(p.cat||"")+" "+(p.dishes||[]).join(" ")).toLowerCase().includes(q));return S.sort==="near"?[...l].sort((a,b)=>(a.m??9999)-(b.m??9999)):sorted(l);}
+function filtered(){const q=S.q.trim().toLowerCase();let l=PLACES.filter(p=>modeMatch(p)&&match(p,S.filter));if(q)l=l.filter(p=>(p.name+" "+(p.ko||"")+" "+p.cuisine+" "+(p.cat||"")+" "+(p.dishes||[]).join(" ")).toLowerCase().includes(q));return S.sort==="near"?[...l].sort((a,b)=>(a.m??9999)-(b.m??9999)):sorted(l);}
 function vExplore(){
-  return `<div class="topbar"><h1 style="font-size:26px">Explore</h1><a class="iconbtn" href="#map" aria-label="Map">${ic("map")}</a></div>
-  <form class="search" onsubmit="event.preventDefault()"><label class="sr" for="q2">Search</label>${ic("search")}<input id="q2" value="${esc(S.q)}" placeholder="Search food, restaurant, 한글 OK" oninput="S.q=this.value;S.limit=30;renderList()" autocomplete="off"></form>
-  <div class="chips" role="group" aria-label="Filter">${FILTERS.map(([k,l])=>`<button class="chip" aria-pressed="${S.filter===k}" onclick="S.filter='${k}';S.limit=30;render()">${l}</button>`).join("")}</div>
+  const fl=MFILTERS[S.mode];if(!fl.some(f=>f[0]===S.filter))S.filter="all";
+  return `<form class="search" style="border-color:transparent;margin-top:6px" onsubmit="event.preventDefault()"><label class="sr" for="q2">Search</label>${ic("search")}<input id="q2" value="${esc(S.q)}" placeholder="Restaurants near ERICA" oninput="S.q=this.value;S.limit=30;renderList()" autocomplete="off"></form>
+  <div class="seg" role="group" aria-label="Interface">${Object.entries(MODES).map(([k,[l]])=>`<button aria-pressed="${S.mode===k}" onclick="setMode('${k}')">${l}</button>`).join("")}</div>
+  <div class="chips" role="group" aria-label="Filter">${fl.map(([k,l])=>`<button class="chip" aria-pressed="${S.filter===k}" ${k==="pick"?'style="border-color:var(--gold);color:'+(S.filter===k?"#fff":"var(--gold)")+(S.filter===k?";background:var(--gold)":"")+'"':""} onclick="S.filter='${k}';S.limit=30;render()">${k==="pick"?ic("award").replace("<svg",'<svg style="width:14px;height:14px;vertical-align:-2px;margin-right:4px"'):""}${l}</button>`).join("")}</div>
   <div id="list">${listHtml(filtered())}</div>`;
 }
 function listHtml(list){
-  if(!list.length)return `<div class="card empty"><h3>No match</h3><p class="muted small">Try another word or another filter. Korean names work too.</p></div>`;
+  const pick=S.filter==="pick";
+  const rules=pick?`<div class="card pad small" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"><div class="eyebrow" style="color:var(--gold)">ERICA Pick · student ranking</div>${["One vote per person, per place","20+ votes and 70% Worth it → gold ERICA Pick badge","More Not worth it than Worth it → badge drops"].map(r=>`<div class="row" style="gap:8px"><span class="dot done" style="border-color:var(--gold);color:var(--gold);background:var(--gold-soft)">${ic("check")}</span>${r}</div>`).join("")}</div>`:"";
+  if(!list.length)return rules+`<div class="card empty"><h3>${pick?"No votes yet":"No match"}</h3><p class="muted small">${pick?"Open a place and tap Worth it or Not worth it. Places with votes show here, best first.":"Try another word or another filter. Korean names work too."}</p></div>`;
   const head=`<div class="row between" style="margin-bottom:10px"><p class="small muted">${list.length} place${list.length>1?"s":""}</p><div class="row" style="gap:6px">${[["top","Top"],["near","Nearest"]].map(([k,l])=>`<button class="chip" style="padding:5px 12px" aria-pressed="${S.sort===k}" onclick="S.sort='${k}';S.limit=30;renderList()">${l}</button>`).join("")}</div></div>`;
   const more=list.length>S.limit?`<button class="btn block" style="margin-top:12px" onclick="S.limit+=30;renderList()">Show more (${list.length-S.limit} left)</button>`:"";
-  return head+`<div class="list">${list.slice(0,S.limit).map(pcard).join("")}</div>`+more;
+  const rows=list.slice(0,S.limit).map((p,i)=>pick&&S.sort==="top"?`<div class="row"><b style="font-size:22px;width:24px;text-align:center;color:${i<3?"var(--gold)":"var(--muted)"}">${i+1}</b><div style="flex:1;min-width:0">${pcard(p)}</div></div>`:pcard(p)).join("");
+  return rules+head+`<div class="list">${rows}</div>`+more;
 }
 function renderList(){const el=document.getElementById("list");if(el)el.innerHTML=listHtml(filtered());}
 
@@ -317,7 +396,7 @@ function vPlace(id){
   const need=Math.max(0,PICK_MIN-t.t);
   return `${topbar(p.name,`<button class="iconbtn" onclick="toggleSave('${p.id}')" aria-pressed="${saved}" aria-label="${saved?"Remove from saved":"Save"}" style="${saved?"background:var(--blue);color:#fff":""}">${ic("bookmark",saved)}</button>`)}
   <div class="card dhero" style="position:relative">${p.img?`<img src="img/${p.img}.webp" alt="Sample photo of ${esc(p.cuisine)} food"><span class="badge b-none" style="position:absolute;left:10px;bottom:10px;background:var(--paper)">Sample photo · not the real shop</span>`:`<div style="text-align:center;padding:16px"><div class="cu">${esc(p.cuisine)}</div><p class="muted" style="margin-top:6px;font-weight:700">${esc(p.ko||"")}</p></div>`}</div>
-  <section class="row wrap" style="gap:6px">${badge(p.diet)}${pickBadge(t)}</section>
+  <section class="row wrap" style="gap:6px">${badge(p.diet)}${vegBadge(p)}${pickBadge(t)}</section>
   <div style="display:flex;flex-direction:column;gap:4px;margin-top:-6px"><h1>${esc(p.name)}</h1>${p.ko&&p.ko!==p.name?`<p style="font-size:17px;font-weight:800">${esc(p.ko)}</p>`:""}<p class="muted">${esc(p.cuisine)} · ${distTxt(p)}</p></div>
   ${p.note?`<div class="note" style="border-color:var(--orange);background:var(--orange-soft);color:var(--orange)">Staff tip: ${esc(p.note)}</div>`:""}
   ${DIETNOTE[p.diet]?`<div class="note" style="border-color:var(--muted);background:var(--paper);color:var(--ink)">${DIETNOTE[p.diet]}</div>`:""}
@@ -411,8 +490,8 @@ function vPick(){
 
 function vSaved(){
   const list=[...S.saved].map(byId).filter(Boolean);
-  return `<div class="topbar"><h1 style="font-size:26px">Saved</h1><a class="btn" href="#import" style="padding:8px 14px;min-height:40px">${ic("link")}Import</a></div>
-  ${list.length?`<div class="list">${list.map(pcard).join("")}</div>`:`<div class="card empty"><span class="mascot">${ic("bookmark")}</span><h3>Nothing saved yet</h3><p class="small muted">Tap the bookmark on a restaurant, or import a food post from social media.</p><a class="btn primary" href="#explore">Find food</a></div>`}
+  return `<div class="topbar"><h1 style="font-size:26px">Saved</h1><span></span></div>
+  ${list.length?`<div class="list">${list.map(pcard).join("")}</div>`:`<div class="card empty"><span class="mascot">${ic("bookmark")}</span><h3>Nothing saved yet</h3><p class="small muted">Tap the bookmark on a restaurant to keep it here.</p><a class="btn primary" href="#explore">Find food</a></div>`}
   ${S.online?"":`<p class="small muted">Saved places stay on this phone.</p>`}`;
 }
 
@@ -519,16 +598,16 @@ async function runImport(url,caption){
 function saveImport(){const ids=S.imp.found.map(x=>x.id).filter(id=>id&&byId(id));if(!ids.length){toast("Choose a place first");return;}ids.forEach(id=>S.saved.add(id));persistSaved();S.imp=null;pickShot(null);toast(ids.length+" place(s) saved");location.hash="saved";}
 
 // ---------- router ----------
-const TABS=[["home","Home","home"],["explore","Explore","compass"],["bot","AI Bot","spark"],["saved","Saved","bookmark"],["map","Map","map"]];
+const TABS=[["home","Home","home"],["explore","Explore","compass"],["bot","AI Bot","spark"],["saved","Saved","bookmark"],["me","Me","user"]];
 function route(){return (location.hash||"#home").slice(1)||"home";}
 let lastRoute=null;
 function render(){
   const r=route();const v=document.getElementById("view");
-  const html=r.startsWith("p-")?vPlace(r.slice(2)):({home:vHome,explore:vExplore,map:vMap,bot:vBot,saved:vSaved,import:vImport,pick:vPick}[r]||vHome)();
+  const html=r.startsWith("p-")?vPlace(r.slice(2)):({home:vHome,explore:vExplore,bot:vBot,saved:vSaved,me:vMe}[r]||vHome)();
   const active=document.activeElement&&document.activeElement.id;const sel=active&&document.activeElement.selectionStart;
   v.innerHTML=html;
   if(active){const el=document.getElementById(active);if(el&&el.tagName==="INPUT"&&r!=="bot"){el.focus();try{el.setSelectionRange(sel,sel)}catch(e){}}}
-  const top=r.startsWith("p-")?"explore":(r==="import"?"saved":(r==="pick"?"home":r));
+  const top=r.startsWith("p-")?"explore":(["home","explore","bot","saved","me"].includes(r)?r:"home");
   document.getElementById("tabs").innerHTML=TABS.map(([k,l,i])=>k==="bot"?`<a class="tab ai" href="#bot" ${top===k?'aria-current="page"':""}><span class="ic">${ic(i)}</span>${l}</a>`:`<a class="tab" href="#${k}" ${top===k?'aria-current="page"':""}>${ic(i,top===k&&k==="saved")}${l}</a>`).join("");
   if(r==="map"&&S.mapView==="kakao"&&CFG.KAKAO_JS_KEY)initKakao();
   if(r!==lastRoute){lastRoute=r;window.scrollTo(0,0);}
