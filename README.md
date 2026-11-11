@@ -9,7 +9,7 @@ They can tap "Add to Home Screen" to install it like an app.
 |---|---|
 | `index.html` | The app (all screens) |
 | `places.json` | 540 places from Kakao Map (+ HESS halal data), with English names and pictures |
-| `img/` | Food drawings and the campus pictures |
+| `img/` | Sample food photos (AI-made, one per food type) |
 | `config.js` | Public settings: Supabase URL, Supabase anon key, Kakao JavaScript key |
 | `api/ai.js` | Server function: AI Bot and Import (calls the Claude API) |
 | `api/oembed.js` | Server function: reads the caption of a TikTok or YouTube link |
@@ -109,4 +109,4 @@ vercel --prod               # real link
 - Secret, never in this folder: Claude API key, Kakao REST key, Supabase service_role key.
 - Database rules (in `schema.sql`): each user can change only their own votes and saved places.
   Everybody sees only vote totals, not who voted.
-- Pictures are drawings of the food type, not photos of the real shops.
+- Pictures are AI-made sample photos of the food type, not photos of the real shops.

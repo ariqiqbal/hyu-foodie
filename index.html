@@ -11,17 +11,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>HYU Foodie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 <style>
-/* Layout: one phone-width column, storybook "drawn" cards (ink outline + hard offset shadow), fixed bottom tab bar. Single light look on purpose. */
+/* Layout: one phone-width column, clean cards (soft shadow, photo pictures), fixed bottom tab bar. Single light look on purpose. */
 :root{
   --blue:#0E4A84; --blue-soft:#E4EDF7; --sky:#BFE0F6;
-  --cream:#F4F1E8; --paper:#FFFFFF; --ink:#13233A; --muted:#5F6B7C; --line:#E2DCCD;
+  --cream:#F5F6F8; --paper:#FFFFFF; --ink:#13233A; --muted:#5F6B7C; --line:#E4E8ED;
   --gold:#B07A00; --gold-soft:#FFF2CC; --orange:#E57C14; --orange-soft:#FFEEDC;
   --green:#2F8A45; --green-soft:#E3F3E6; --red:#C8372D; --red-soft:#FBE7E5; --naver:#03A94F;
-  --display:"Fredoka","Baloo 2","Nunito",ui-rounded,system-ui,sans-serif;
+  --display:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --shadow:3px 3px 0 var(--ink); --shadow-sm:2px 2px 0 var(--ink);
+  --shadow:0 4px 16px rgba(19,35,58,.08); --shadow-sm:0 1px 4px rgba(19,35,58,.08);
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -34,9 +34,9 @@ button{cursor:pointer}
 .app{max-width:460px;margin:0 auto;min-height:100%;padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
 .view{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 24px;display:flex;flex-direction:column;gap:16px}
 h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:0}
-h1{font-size:28px;line-height:1.08;font-weight:700}
-h2{font-size:20px;font-weight:700}
-h3{font-size:17px;font-weight:600}
+h1{font-size:26px;line-height:1.15;font-weight:800;letter-spacing:-.01em}
+h2{font-size:19px;font-weight:800}
+h3{font-size:16px;font-weight:700}
 p{margin:0}
 .muted{color:var(--muted)}
 .small{font-size:12px}
@@ -44,13 +44,13 @@ p{margin:0}
 .row{display:flex;align-items:center;gap:10px}
 .between{justify-content:space-between}
 .wrap{flex-wrap:wrap}
-.card{background:var(--paper);border:2px solid var(--ink);border-radius:18px;box-shadow:var(--shadow)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
 .pad{padding:14px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:6px}
-.iconbtn{width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:var(--paper);display:grid;place-items:center;box-shadow:var(--shadow-sm);flex:none}
+.iconbtn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;box-shadow:var(--shadow-sm);flex:none}
 .iconbtn svg{width:20px;height:20px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:2px solid var(--ink);border-radius:999px;padding:12px 18px;font-weight:800;background:var(--paper);box-shadow:var(--shadow-sm);text-decoration:none;color:var(--ink);min-height:46px}
-.btn:active{transform:translate(2px,2px);box-shadow:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:12px 18px;font-weight:800;background:var(--paper);box-shadow:var(--shadow-sm);text-decoration:none;color:var(--ink);min-height:46px}
+.btn:active{opacity:.8}
 .btn.primary{background:var(--blue);color:#fff}
 .btn.naver{background:var(--naver);color:#fff}
 .btn.orange{background:var(--orange);color:#fff}
@@ -59,7 +59,7 @@ p{margin:0}
 .btn svg{width:18px;height:18px}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:none;border:2px solid var(--ink);border-radius:999px;padding:7px 14px;background:var(--paper);font-weight:700;font-size:13px}
+.chip{flex:none;border:1px solid var(--line);border-radius:999px;padding:7px 14px;background:var(--paper);font-weight:700;font-size:13px}
 .chip[aria-pressed="true"]{background:var(--blue);color:#fff}
 .badge{display:inline-flex;align-items:center;gap:4px;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:800;white-space:nowrap}
 .badge svg{width:12px;height:12px}
@@ -67,38 +67,38 @@ p{margin:0}
 .b-pork{background:var(--orange-soft);color:var(--orange)}
 .b-vegan{background:var(--green-soft);color:var(--green)}
 .b-chinese{background:var(--red-soft);color:var(--red)}
-.b-none{background:var(--cream);color:var(--muted);border:1.5px solid var(--line)}
+.b-none{background:var(--cream);color:var(--muted)}
 .b-gold{background:var(--gold-soft);color:var(--gold)}
 .b-pick{background:var(--gold-soft);color:var(--gold);border:1.5px solid var(--gold);border-radius:999px}
-.search{display:flex;align-items:center;gap:10px;border:2px solid var(--ink);border-radius:999px;background:var(--paper);padding:0 16px;min-height:50px;box-shadow:var(--shadow-sm)}
+.search{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:999px;background:var(--paper);padding:0 16px;min-height:50px;box-shadow:var(--shadow-sm)}
 .search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font-size:15px}
 .search svg{width:18px;height:18px;flex:none;color:var(--muted)}
 /* hero */
-.hero{position:relative;overflow:hidden;background:var(--sky);aspect-ratio:1/0.92;max-width:100%}
+.hero{position:relative;overflow:hidden;border:0;color:#fff;padding:18px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(120deg,#0E4A84,#2F7BC4)}
 .hero img{position:absolute;width:112%;left:-6%;top:16%;max-width:none}
 .hero .ht{position:absolute;left:18px;top:16px;right:18px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.hero h1{font-size:36px;line-height:.95}
+.hero h1{font-size:24px}.hero .eyebrow{color:#CFE3F7}.hero p{color:#E6F0FA;font-size:13px}.hero .btn{align-self:flex-start;border:0;min-height:40px;padding:9px 16px;color:var(--blue)}
 .pill-dark{background:var(--ink);color:#fff;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;white-space:nowrap}
-.hero .stat{position:absolute;left:16px;bottom:14px;background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;box-shadow:var(--shadow-sm)}
+.hero .stat{position:absolute;left:16px;bottom:14px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:800;box-shadow:var(--shadow-sm)}
 /* grid tiles */
 .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px 10px;border:2px solid var(--ink);border-radius:18px;background:var(--paper);box-shadow:var(--shadow-sm);font-weight:800;font-size:12px;text-decoration:none;color:var(--ink);text-align:center}
+.tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px 10px;border:1px solid var(--line);border-radius:18px;background:var(--paper);box-shadow:var(--shadow-sm);font-weight:800;font-size:12px;text-decoration:none;color:var(--ink);text-align:center}
 .tile .ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center}
 .tile .ic svg{width:20px;height:20px}
 /* place cards */
 .list{display:flex;flex-direction:column;gap:12px}
 .pcard{display:flex;gap:12px;padding:10px;align-items:center;text-decoration:none;color:inherit}
-.thumb{width:84px;height:84px;border-radius:14px;border:2px solid var(--ink);flex:none;overflow:hidden;display:grid;place-items:center;background:var(--blue-soft)}
+.thumb{width:84px;height:84px;border-radius:14px;border:1px solid var(--line);flex:none;overflow:hidden;display:grid;place-items:center;background:var(--blue-soft)}
 .thumb img{width:100%;height:100%;object-fit:cover}
 .thumb .cu{word-break:keep-all;font-family:var(--display);font-weight:700;font-size:13px;text-align:center;padding:4px;line-height:1.1}
 .pinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .pinfo h3{font-size:16px}
-.meter{height:8px;border-radius:8px;background:var(--gold-soft);overflow:hidden;border:1.5px solid var(--ink)}
+.meter{height:8px;border-radius:8px;background:var(--gold-soft);overflow:hidden;border:0}
 .meter i{display:block;height:100%;background:var(--gold)}
 .hscroll{display:flex;gap:12px;overflow-x:auto;padding:2px 4px 8px 2px;scrollbar-width:none}
 .hscroll::-webkit-scrollbar{display:none}
 .vcard{flex:none;width:210px;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column}
-.vcard .ph{height:112px;border-bottom:2px solid var(--ink);display:grid;place-items:center;background:var(--blue-soft);overflow:hidden}
+.vcard .ph{height:112px;border-bottom:0;display:grid;place-items:center;background:var(--blue-soft);overflow:hidden}
 .vcard .ph img{width:100%;height:100%;object-fit:cover}
 .vcard .bd{padding:12px;display:flex;flex-direction:column;gap:6px}
 /* detail */
@@ -111,34 +111,34 @@ p{margin:0}
 .info dt{font-weight:800}
 .info dd{margin:0}
 .dish{display:flex;align-items:center;gap:10px;padding:8px 0}
-.num{width:26px;height:26px;border-radius:50%;border:2px solid var(--ink);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none;background:var(--paper)}
+.num{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none;background:var(--paper)}
 .num.gold{background:var(--orange);color:#fff}
 .vote{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .vote .btn{border-radius:14px}
-.vote .yes[aria-pressed="true"]{background:var(--gold-soft);color:var(--gold);border-color:var(--gold);box-shadow:2px 2px 0 var(--gold)}
+.vote .yes[aria-pressed="true"]{background:var(--gold-soft);color:var(--gold);border-color:var(--gold);box-shadow:none}
 .vote .no[aria-pressed="true"]{background:var(--red-soft);color:var(--red)}
 .modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.mode{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border:2px solid var(--ink);border-radius:16px;background:var(--cream);text-decoration:none;color:var(--ink);font-weight:800;font-size:12px}
-.mascot{width:52px;height:52px;border-radius:50%;border:2px dashed var(--blue);background:var(--sky);display:grid;place-items:center;color:var(--blue)}
+.mode{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border:1px solid var(--line);border-radius:16px;background:var(--cream);text-decoration:none;color:var(--ink);font-weight:800;font-size:12px}
+.mascot{width:52px;height:52px;border-radius:50%;border:0;background:var(--sky);display:grid;place-items:center;color:var(--blue)}
 .mascot svg{width:24px;height:24px}
 /* map */
 .mapwrap{position:relative;overflow:hidden;aspect-ratio:3/4;max-width:100%}
 .mapwrap>img{width:100%;height:100%;object-fit:cover;display:block}
-.lm{position:absolute;transform:translate(-50%,-50%);background:var(--paper);border:1.5px solid var(--ink);border-radius:999px;padding:2px 8px;font-size:10px;font-weight:800;white-space:nowrap;box-shadow:2px 2px 0 var(--ink);display:flex;align-items:center;gap:4px;pointer-events:none}
+.lm{position:absolute;transform:translate(-50%,-50%);background:var(--paper);border:0;border-radius:999px;padding:2px 8px;font-size:10px;font-weight:800;white-space:nowrap;box-shadow:2px 2px 0 var(--ink);display:flex;align-items:center;gap:4px;pointer-events:none}
 .lm i{width:7px;height:7px;border-radius:50%;display:block}
 .pin{position:absolute;transform:translate(-50%,-100%);border:0;background:none;padding:0;width:34px;height:42px}
 .pin svg{width:34px;height:42px;filter:drop-shadow(2px 2px 0 var(--ink))}
 .pin span{position:absolute;top:7px;left:0;right:0;text-align:center;font-weight:800;font-size:12px;color:#fff}
 .pin[aria-pressed="true"] svg path{fill:var(--orange)}
 /* chat */
-.bubble{max-width:86%;padding:10px 14px;border:2px solid var(--ink);border-radius:18px;background:var(--paper);box-shadow:var(--shadow-sm);white-space:pre-wrap}
+.bubble{max-width:86%;padding:10px 14px;border:1px solid var(--line);border-radius:18px;background:var(--paper);box-shadow:var(--shadow-sm);white-space:pre-wrap}
 .bubble.me{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:6px}
 .bubble.bot{border-bottom-left-radius:6px}
 .composer{display:flex;gap:8px}
-.composer input,.field{flex:1;min-width:0;border:2px solid var(--ink);border-radius:999px;padding:12px 16px;background:var(--paper);box-shadow:var(--shadow-sm);outline:0}
+.composer input,.field{flex:1;min-width:0;border:1px solid var(--line);border-radius:999px;padding:12px 16px;background:var(--paper);box-shadow:var(--shadow-sm);outline:0}
 textarea.field{border-radius:16px;min-height:96px;resize:vertical;width:100%}
 .steps{display:flex;flex-direction:column}
-.step{border-top:2px solid var(--ink);padding:12px 0;display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px}
+.step{border-top:1px solid var(--line);padding:12px 0;display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px}
 .step b{font-family:var(--display);font-size:34px;line-height:1;color:var(--blue)}
 .check{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1.5px dashed var(--line)}
 .check:first-child{border-top:0}
@@ -148,16 +148,16 @@ textarea.field{border-radius:16px;min-height:96px;resize:vertical;width:100%}
 .spin{width:12px;height:12px;border:2px solid var(--blue);border-right-color:transparent;border-radius:50%;animation:sp 0.8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
-.note{border:2px dashed var(--blue);background:var(--blue-soft);border-radius:14px;padding:10px 12px;font-size:12px;font-weight:600;color:var(--blue)}
+.note{border:0;background:var(--blue-soft);border-radius:14px;padding:10px 12px;font-size:12px;font-weight:600;color:var(--blue)}
 .toast{position:fixed;left:50%;bottom:calc(98px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;font-size:13px;z-index:40;max-width:calc(100% - 32px);text-align:center}
 .empty{text-align:center;padding:24px 16px;display:flex;flex-direction:column;gap:8px;align-items:center}
 /* tab bar */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:2px solid var(--ink);padding:8px max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:1px solid var(--line);padding:8px max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
 .tabbar nav{max-width:460px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);align-items:end}
 .tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--muted);text-decoration:none;padding:2px 0}
 .tab svg{width:24px;height:24px}
 .tab[aria-current="page"]{color:var(--blue)}
-.tab.ai .ic{width:48px;height:48px;border-radius:50%;background:var(--orange);border:2px solid var(--ink);display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm);margin-top:-22px}
+.tab.ai .ic{width:48px;height:48px;border-radius:50%;background:var(--orange);border:1px solid var(--line);display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm);margin-top:-22px}
 .tab.ai{color:var(--orange)}
 .tab.ai[aria-current="page"] .ic{background:var(--blue)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -168,9 +168,13 @@ html,body{margin:0}
 body{padding-top:env(safe-area-inset-top,0px)}
 img{max-width:100%}
 [hidden]{display:none!important}
-.kdot{width:14px;height:14px;border-radius:50%;border:2px solid #13233A;padding:0;cursor:pointer;display:block}
+.kdot{width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(19,35,58,.45);padding:0;cursor:pointer;display:block}
 .kdot.on{width:26px;height:26px;box-shadow:0 0 0 3px #E57C14}
 .kgate{background:#0E4A84;color:#fff;font-weight:800;font-size:11px;padding:3px 9px;border-radius:999px;border:2px solid #fff;white-space:nowrap}
+.btn.primary,.btn.naver,.btn.orange,.chip[aria-pressed="true"]{border-color:transparent}
+.thumb,.vcard .ph,.dhero{border-color:transparent}
+.tab.ai .ic{border:0;box-shadow:0 4px 12px rgba(229,124,20,.4)}
+.note{border:0}
 </style>
 </head>
 <body>
@@ -182,7 +186,7 @@ img{max-width:100%}
 <div id="toast" class="toast" hidden></div>
 
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 // ---------- data: places.json (Kakao Map + HESS Food Guide for Muslims) ----------
 let PLACES=[],PMAP=new Map();
@@ -212,6 +216,8 @@ async function boot(){
   render();
   try{const r=await fetch("places.json");PLACES=await r.json();PMAP=new Map(PLACES.map(p=>[p.id,p]));}catch(e){toast("Could not load places. Check your connection.");}
   loadLocalSaved();render();
+  if(!CFG.SUPABASE_URL||!CFG.SUPABASE_ANON_KEY)S.dbError="config.js has no Supabase URL or key";
+  else if(!window.supabase)S.dbError="the Supabase library did not load (network or ad blocker)";
   if(CFG.SUPABASE_URL&&CFG.SUPABASE_ANON_KEY&&window.supabase){
     try{
       S.sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY);
@@ -220,7 +226,7 @@ async function boot(){
       S.uid=session.user.id;S.online=true;
       await Promise.all([loadTotals(),loadMine(),syncSaved()]);
       setInterval(()=>{if(document.visibilityState==="visible")loadTotals().then(softRender);},60000);
-    }catch(e){console.warn("Supabase not ready:",e);S.online=false;}
+    }catch(e){console.warn("Supabase not ready:",e);S.online=false;S.dbError=(e&&(e.message||e.error_description||e.code))||String(e);}
   }
   render();
 }
@@ -236,7 +242,7 @@ async function toggleSave(id){
 }
 let voting=false;
 async function vote(id,val){
-  if(!S.sb||!S.uid){toast("Voting is not connected yet. The app owner must set up Supabase.");return;}
+  if(!S.sb||!S.uid){toast("Voting is not connected: "+(S.dbError||"unknown reason"));return;}
   if(voting)return;voting=true;
   const prev=S.my[id]||0,next=prev===val?0:val;
   const t=S.totals[id]?[...S.totals[id]]:[0,0];if(prev===1)t[0]--;if(prev===-1)t[1]--;if(next===1)t[0]++;if(next===-1)t[1]++;S.totals[id]=t;if(next)S.my[id]=next;else delete S.my[id];render();
@@ -267,9 +273,9 @@ function vHome(){
   return `
   <div class="topbar"><div class="row"><span class="iconbtn" aria-hidden="true">${ic("user")}</span><h2>Hi there!</h2></div><a class="iconbtn" href="#import" aria-label="Import from social media">${ic("link")}</a></div>
   <section class="card hero" aria-label="Your community">
-    <img src="img/town.webp" alt="Illustrated campus town with restaurants">
-    <div class="ht"><div><div class="eyebrow">Your community</div><h1>HANYANG<br>ERICA</h1></div><span class="pill-dark">Ansan · Beta</span></div>
-    <span class="stat">${PLACES.length} places within 1.5 km</span>
+    <div class="row between" style="align-items:flex-start"><div><div class="eyebrow">Hanyang University ERICA</div><h1>What do you feel like eating today?</h1></div><span class="pill-dark" style="background:rgba(255,255,255,.18)">Beta</span></div>
+    <p>${PLACES.length} places within 1.5 km. Halal and pork-free labels, student votes, and an AI helper.</p>
+    <a class="btn" href="#bot">${ic("spark")}Ask AI what to eat</a>
   </section>
   <form class="search" onsubmit="event.preventDefault();S.q=this.q.value;S.limit=30;location.hash='explore'"><label class="sr" for="q">Search</label>${ic("search")}<input id="q" name="q" placeholder='Search "kebab", "마라탕", "curry"' autocomplete="off"></form>
   <div class="tiles">
@@ -286,7 +292,7 @@ function vHome(){
   <div class="hscroll">${picks.map(vcard).join("")}</div>
   <div class="row between"><h2>Closest to campus</h2><a href="#explore" onclick="S.filter='all';S.sort='near';S.limit=30" class="small" style="color:var(--blue);font-weight:800">See all</a></div>
   <div class="list">${near.map(pcard).join("")}</div>
-  <div class="note">Beta data: ${PLACES.length} restaurants and cafes from Kakao Map within 1.5 km of ERICA (bars left out). 12 are checked by the HESS Food Guide for Muslims. "Not checked" means nobody has checked halal status yet. Pictures are drawings of the food type, not photos of the shop.</div>`;
+  <div class="note">Beta data: ${PLACES.length} restaurants and cafes from Kakao Map within 1.5 km of ERICA (bars left out). 12 are checked by the HESS Food Guide for Muslims. "Not checked" means nobody has checked halal status yet. Pictures are sample photos of the food type (AI-made), not photos of the shop.</div>`;
 }
 function tile(l,h,i,bg,fg,f){return `<a class="tile" href="#${h}" ${f?`onclick="S.filter='${f}';S.limit=30;S.sort='top'"`:""}><span class="ic" style="background:${bg};color:${fg}">${ic(i)}</span>${l}</a>`;}
 function filtered(){const q=S.q.trim().toLowerCase();let l=PLACES.filter(p=>match(p,S.filter));if(q)l=l.filter(p=>(p.name+" "+(p.ko||"")+" "+p.cuisine+" "+(p.cat||"")+" "+(p.dishes||[]).join(" ")).toLowerCase().includes(q));return S.sort==="near"?[...l].sort((a,b)=>(a.m??9999)-(b.m??9999)):sorted(l);}
@@ -310,7 +316,7 @@ function vPlace(id){
   const t=tally(p.id),mv=myVote(p.id),saved=S.saved.has(p.id);
   const need=Math.max(0,PICK_MIN-t.t);
   return `${topbar(p.name,`<button class="iconbtn" onclick="toggleSave('${p.id}')" aria-pressed="${saved}" aria-label="${saved?"Remove from saved":"Save"}" style="${saved?"background:var(--blue);color:#fff":""}">${ic("bookmark",saved)}</button>`)}
-  <div class="card dhero" style="position:relative">${p.img?`<img src="img/${p.img}.webp" alt="Illustration of ${esc(p.cuisine)} food"><span class="badge b-none" style="position:absolute;left:10px;bottom:10px;background:var(--paper)">Illustration · not the real shop</span>`:`<div style="text-align:center;padding:16px"><div class="cu">${esc(p.cuisine)}</div><p class="muted" style="margin-top:6px;font-weight:700">${esc(p.ko||"")}</p></div>`}</div>
+  <div class="card dhero" style="position:relative">${p.img?`<img src="img/${p.img}.webp" alt="Sample photo of ${esc(p.cuisine)} food"><span class="badge b-none" style="position:absolute;left:10px;bottom:10px;background:var(--paper)">Sample photo · not the real shop</span>`:`<div style="text-align:center;padding:16px"><div class="cu">${esc(p.cuisine)}</div><p class="muted" style="margin-top:6px;font-weight:700">${esc(p.ko||"")}</p></div>`}</div>
   <section class="row wrap" style="gap:6px">${badge(p.diet)}${pickBadge(t)}</section>
   <div style="display:flex;flex-direction:column;gap:4px;margin-top:-6px"><h1>${esc(p.name)}</h1>${p.ko&&p.ko!==p.name?`<p style="font-size:17px;font-weight:800">${esc(p.ko)}</p>`:""}<p class="muted">${esc(p.cuisine)} · ${distTxt(p)}</p></div>
   ${p.note?`<div class="note" style="border-color:var(--orange);background:var(--orange-soft);color:var(--orange)">Staff tip: ${esc(p.note)}</div>`:""}
@@ -344,32 +350,29 @@ function vPlace(id){
 async function copyText(t,msg){try{await navigator.clipboard.writeText(t);toast(msg);}catch(e){toast(t);}}
 
 const LAT0=37.2970,LON0=126.8350,KX=Math.cos(LAT0*Math.PI/180)*111320,KY=110540;
-const DOT={halal:"#0E4A84",porkfree:"#E57C14",halalc:"#B07A00",veganc:"#2F8A45",chinese:"#C8372D",none:"#A39C8C"};
+const DOT={halal:"#0E4A84",porkfree:"#E57C14",halalc:"#B07A00",veganc:"#2F8A45",chinese:"#C8372D",none:"#8E99A8"};
 function xy(p){return [(p.lon-LON0)*KX,-(p.lat-LAT0)*KY];}
 function vMap(){
   const sel=S.mapSel&&byId(S.mapSel);
-  const seg=`<div class="chips" role="group" aria-label="Map view">${[...(CFG.KAKAO_JS_KEY?[["kakao","Kakao map"]]:[]),["real","Dot map"],["art","Drawn map"]].map(([k,l])=>`<button class="chip" aria-pressed="${S.mapView===k}" onclick="S.mapView='${k}';render()">${l}</button>`).join("")}</div>`;
+  const seg=`<div class="chips" role="group" aria-label="Map view">${[...(CFG.KAKAO_JS_KEY?[["kakao","Kakao map"]]:[]),["real","Dot map"]].map(([k,l])=>`<button class="chip" aria-pressed="${S.mapView===k}" onclick="S.mapView='${k}';render()">${l}</button>`).join("")}</div>`;
   const legend=`<div class="row wrap small" style="gap:10px">${[["halal","Halal"],["porkfree","Pork-free"],["chinese","Chinese"],["veganc","Salad"],["none","Not checked"]].map(([k,l])=>`<span class="row" style="gap:5px"><i style="width:12px;height:12px;border-radius:50%;background:${DOT[k]};border:1.5px solid #13233A;display:inline-block"></i>${l}</span>`).join("")}</div>`;
   if(S.mapView==="kakao"&&CFG.KAKAO_JS_KEY)return `<div class="topbar"><h1 style="font-size:26px">ERICA map</h1></div>${seg}
   <div class="chips" role="group" aria-label="Filter">${FILTERS.slice(0,5).map(([k,l])=>`<button class="chip" aria-pressed="${S.filter===k}" onclick="S.filter='${k}';render()">${l}</button>`).join("")}</div>
   <div id="kmap" class="card" style="height:440px;overflow:hidden" aria-label="Kakao map of places near ERICA"></div>${legend}<div id="mapcard">${mapCard()}</div>`;
-  if(S.mapView==="art")return `<div class="topbar"><h1 style="font-size:26px">ERICA map</h1></div>${seg}
-  <div class="card mapwrap"><img src="img/map.webp" alt="Drawn map of the area around Hanyang University ERICA"></div>
-  <p class="small muted">Illustration of the ERICA area. It is not to scale. Use "Real positions" to find places.</p>`;
   const list=PLACES.filter(p=>p.lat&&match(p,S.filter));
   const z=S.zoom, size=3300/z; let cx=0,cy=0; if(sel&&sel.lat&&z>1){[cx,cy]=xy(sel);} const vb=`${cx-size/2} ${cy-size/2} ${size} ${size}`;
   const r=k=>(k==="none"?16:24)/Math.sqrt(z);
-  const RANK={none:0,chinese:1,veganc:2,halalc:3,porkfree:4,halal:5};const dots=list.sort((a,b)=>((a.id===S.mapSel)-(b.id===S.mapSel))||(RANK[a.diet]-RANK[b.diet])).map(p=>{const [x,y]=xy(p);const on=S.mapSel===p.id;return `<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${(on?2:1)*r(p.diet)}" fill="${DOT[p.diet]}" stroke="#13233A" stroke-width="${(on?8:4)/Math.sqrt(z)}" tabindex="0" role="button" aria-label="${esc(p.name)}" onclick="S.mapSel='${p.id}';render()" onkeydown="if(event.key==='Enter'){S.mapSel='${p.id}';render()}" style="cursor:pointer"><title>${esc(p.name)}</title></circle>`;}).join("");
+  const RANK={none:0,chinese:1,veganc:2,halalc:3,porkfree:4,halal:5};const dots=list.sort((a,b)=>((a.id===S.mapSel)-(b.id===S.mapSel))||(RANK[a.diet]-RANK[b.diet])).map(p=>{const [x,y]=xy(p);const on=S.mapSel===p.id;return `<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${(on?2:1)*r(p.diet)}" fill="${DOT[p.diet]}" stroke="#FFFFFF" stroke-width="${(on?8:4)/Math.sqrt(z)}" tabindex="0" role="button" aria-label="${esc(p.name)}" onclick="S.mapSel='${p.id}';render()" onkeydown="if(event.key==='Enter'){S.mapSel='${p.id}';render()}" style="cursor:pointer"><title>${esc(p.name)}</title></circle>`;}).join("");
   const rings=[500,1000,1500].map(d=>`<circle cx="0" cy="0" r="${d}" fill="none" stroke="#13233A" stroke-opacity=".35" stroke-width="${6/Math.sqrt(z)}" stroke-dasharray="${30/Math.sqrt(z)} ${24/Math.sqrt(z)}"/><text x="0" y="${-d-18}" text-anchor="middle" font-size="${70/Math.sqrt(z)}" font-weight="800" fill="#5F6B7C" font-family="Plus Jakarta Sans,sans-serif">${d} m</text>`).join("");
   return `<div class="topbar"><h1 style="font-size:26px">ERICA map</h1><div class="row" style="gap:6px"><button class="iconbtn" onclick="S.zoom=Math.max(1,S.zoom/1.6);render()" aria-label="Zoom out" style="font-weight:800;font-size:20px">−</button><button class="iconbtn" onclick="S.zoom=Math.min(6,S.zoom*1.6);render()" aria-label="Zoom in" style="font-weight:800;font-size:20px">+</button></div></div>
   ${seg}
   <div class="chips" role="group" aria-label="Filter">${FILTERS.slice(0,5).map(([k,l])=>`<button class="chip" aria-pressed="${S.filter===k}" onclick="S.filter='${k}';render()">${l}</button>`).join("")}</div>
-  <div class="card" style="overflow:hidden;background:#FBF8EF">
+  <div class="card" style="overflow:hidden;background:#FFFFFF">
    <svg viewBox="${vb}" style="display:block;width:100%;height:auto;aspect-ratio:1" aria-label="Map of ${list.length} places around ERICA campus">
-    <defs><pattern id="grid" width="250" height="250" patternUnits="userSpaceOnUse"><path d="M250 0H0V250" fill="none" stroke="#E2DCCD" stroke-width="4"/></pattern></defs>
+    <defs><pattern id="grid" width="250" height="250" patternUnits="userSpaceOnUse"><path d="M250 0H0V250" fill="none" stroke="#EEF1F4" stroke-width="4"/></pattern></defs>
     <rect x="-3000" y="-3000" width="6000" height="6000" fill="url(#grid)"/>
     ${rings}${dots}
-    <g transform="translate(0 0)"><circle r="${60/Math.sqrt(z)}" fill="#F4F1E8" stroke="#0E4A84" stroke-width="${12/Math.sqrt(z)}"/><circle r="${24/Math.sqrt(z)}" fill="#0E4A84"/><text y="${-90/Math.sqrt(z)}" text-anchor="middle" font-size="${80/Math.sqrt(z)}" font-weight="800" fill="#0E4A84" font-family="Fredoka,Plus Jakarta Sans,sans-serif" stroke="#FBF8EF" stroke-width="${16/Math.sqrt(z)}" paint-order="stroke">ERICA campus</text></g>
+    <g transform="translate(0 0)"><circle r="${60/Math.sqrt(z)}" fill="#F4F1E8" stroke="#0E4A84" stroke-width="${12/Math.sqrt(z)}"/><circle r="${24/Math.sqrt(z)}" fill="#0E4A84"/><text y="${-90/Math.sqrt(z)}" text-anchor="middle" font-size="${80/Math.sqrt(z)}" font-weight="800" fill="#0E4A84" font-family="Plus Jakarta Sans,sans-serif" stroke="#FBF8EF" stroke-width="${16/Math.sqrt(z)}" paint-order="stroke">ERICA campus</text></g>
     <text x="${cx+size/2-30}" y="${cy-size/2+90}" text-anchor="end" font-size="${80/Math.sqrt(z)}" font-weight="800" fill="#13233A" font-family="Plus Jakarta Sans,sans-serif">N ↑</text>
    </svg>
   </div>
