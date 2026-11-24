@@ -4,5 +4,6 @@
   "version": "1.0.0",
   "type": "module",
   "description": "HYU Foodie web app (static site + Vercel functions)",
-  "engines": { "node": ">=20" }
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test" }
 }
