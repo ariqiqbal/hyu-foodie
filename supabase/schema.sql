@@ -39,3 +39,20 @@ create table if not exists public.saved (
 alter table public.saved enable row level security;
 drop policy if exists "own saved" on public.saved;
 create policy "own saved" on public.saved for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- 4) Places found by live search (api/search.js), waiting for the team to check them.
+--    Only the server writes here (with the service_role key, set in Vercel). Everyone can read.
+create table if not exists public.discovered_places (
+  kakao_id   text primary key,
+  name_ko    text not null,
+  category   text,
+  address    text,
+  lat        double precision,
+  lon        double precision,
+  status     text not null default 'unverified' check (status in ('unverified', 'verified', 'hidden')),
+  first_seen timestamptz not null default now(),
+  last_seen  timestamptz not null default now()
+);
+alter table public.discovered_places enable row level security;
+drop policy if exists "read discovered" on public.discovered_places;
+create policy "read discovered" on public.discovered_places for select using (true);
