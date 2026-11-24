@@ -248,7 +248,7 @@ function vegBadge(p){const v=vegOf(p);return v?`<span class="badge ${v[0]==="vg"
 const MODES={general:["General","All restaurants","hansang"],halal:["Halal","Halal & pork-free","kebab"],veg:["Vegetarian","Vegetarian & vegan","vegan"],mart:["Mart","Halal groceries","grocery"]};
 const MFILTERS={general:[["all","All"],["pick","ERICA Pick"],["Korean","Korean"],["Cafe","Cafe"],["chinese","Chinese"],["Japanese","Japanese"],["Chicken","Chicken"],["Western","Western"],["Korean street food","Street food"],["Snacks & dessert","Dessert"],["Asian","Asian"]],halal:[["all","All"],["pick","ERICA Pick"],["halal","Halal certified"],["porkfree","Pork-free options"]],veg:[["all","All"],["pick","ERICA Pick"]],mart:[["all","All"]]};
 function modeMatch(p){if(S.mode==="halal")return ["halal","halalc","porkfree"].includes(p.diet);if(S.mode==="veg")return !!vegOf(p);if(S.mode==="mart")return false;return true;}
-function setMode(m){S.mode=m;S.filter="all";S.limit=30;try{localStorage.setItem("hyu-mode",m);}catch(e){}render();}
+function setMode(m){S.mode=m;S.filter="all";S.limit=30;try{localStorage.setItem("hyu-mode",m);}catch(e){}render();if(typeof queueLive==="function")queueLive();}
 function match(p,f){if(f==="all")return true;if(f==="pick")return tally(p.id).t>0;if(f==="halal")return p.diet==="halal"||p.diet==="halalc";if(f==="porkfree")return p.diet==="porkfree";if(f==="chinese")return p.diet==="chinese";return p.group===f;}
 const distTxt=p=>p.m!=null?`${p.m} m · ${p.w} min walk`:"near ERICA";
 const PICK_MIN=20, PICK_PCT=0.7;
@@ -263,7 +263,7 @@ const kakaoUrl=p=>p.k?"https://place.map.kakao.com/"+p.k:"https://map.kakao.com/
 
 // ---------- state ----------
 const CFG=window.HYU_CONFIG||{};
-const S={mode:(()=>{try{const m=localStorage.getItem("hyu-mode");return ["general","halal","veg","mart"].includes(m)?m:"general";}catch(e){return "general";}})(),sb:null,uid:null,online:false,totals:{},my:{},votesLoaded:false,saved:new Set(),filter:"all",q:"",sort:"top",limit:30,zoom:1,mapView:(CFG.KAKAO_JS_KEY?"kakao":"real"),chat:[],botBusy:false,imp:null,impImg:null,impImgUrl:null,mapSel:null,canVote:true,aiOff:false};
+const S={mode:(()=>{try{const m=localStorage.getItem("hyu-mode");return ["general","halal","veg","mart"].includes(m)?m:"general";}catch(e){return "general";}})(),sb:null,uid:null,online:false,totals:{},my:{},votesLoaded:false,saved:new Set(),filter:"all",q:"",sort:"top",limit:30,zoom:1,mapView:(CFG.KAKAO_JS_KEY?"kakao":"real"),chat:[],botBusy:false,imp:null,impImg:null,impImgUrl:null,mapSel:null,canVote:true,aiOff:false,ext:{q:"",busy:false,list:[],err:null,open:false},searchOff:false};
 function tally(id){const v=S.totals[id]||[0,0];const y=v[0],n=v[1],t=y+n;return {y,n,t,pct:t?y/t:0,pick:t>=PICK_MIN&&y/t>=PICK_PCT&&y>n};}
 const myVote=id=>S.my[id]||0;
 function score(p){const t=tally(p.id);return (t.pick?1000:0)+t.y*3-t.n*2+({halal:40,porkfree:20,halalc:10}[p.diet]||0)-(p.m??900)/100;}
@@ -396,10 +396,11 @@ function vExplore(){
   <div class="seg" role="group" aria-label="Interface">${Object.entries(MODES).map(([k,[l]])=>`<button aria-pressed="${S.mode===k}" onclick="setMode('${k}')">${l}</button>`).join("")}</div>
   <p class="small muted">${l.length} mart${l.length===1?"":"s"}</p><div class="list">${l.map(mcard).join("")||`<div class="card empty"><h3>No match</h3></div>`}</div>`;}
   const fl=MFILTERS[S.mode];if(!fl.some(f=>f[0]===S.filter))S.filter="all";
-  return `<form class="search" style="border-color:transparent;margin-top:6px" onsubmit="event.preventDefault()"><label class="sr" for="q2">Search</label>${ic("search")}<input id="q2" value="${esc(S.q)}" placeholder="Restaurants near ERICA" oninput="S.q=this.value;S.limit=30;renderList()" autocomplete="off"></form>
+  return `<form class="search" style="border-color:transparent;margin-top:6px" onsubmit="event.preventDefault()"><label class="sr" for="q2">Search</label>${ic("search")}<input id="q2" value="${esc(S.q)}" placeholder="Restaurants near ERICA" oninput="S.q=this.value;S.limit=30;renderList();renderExt();queueLive()" autocomplete="off"></form>
   <div class="seg" role="group" aria-label="Interface">${Object.entries(MODES).map(([k,[l]])=>`<button aria-pressed="${S.mode===k}" onclick="setMode('${k}')">${l}</button>`).join("")}</div>
   <div class="chips" role="group" aria-label="Filter">${fl.map(([k,l])=>`<button class="chip" aria-pressed="${S.filter===k}" ${k==="pick"?'style="border-color:var(--gold);color:'+(S.filter===k?"#fff":"var(--gold)")+(S.filter===k?";background:var(--gold)":"")+'"':""} onclick="S.filter='${k}';S.limit=30;render()">${k==="pick"?ic("award").replace("<svg",'<svg style="width:14px;height:14px;vertical-align:-2px;margin-right:4px"'):""}${l}</button>`).join("")}</div>
-  <div id="list">${listHtml(filtered())}</div>`;
+  <div id="list">${listHtml(filtered())}</div>
+  <div id="ext">${extHtml()}</div>`;
 }
 function listHtml(list){
   const pick=S.filter==="pick";
@@ -411,6 +412,70 @@ function listHtml(list){
   return rules+head+`<div class="list">${rows}</div>`+more;
 }
 function renderList(){const el=document.getElementById("list");if(el)el.innerHTML=listHtml(filtered());}
+
+// ---------- live search: more places from Kakao Map (server: /api/search) ----------
+// Places found here are NOT in places.json and nobody has checked them, so they are always marked "Unverified".
+const EXTMAP=new Map();let extTimer=null,extSeq=0;
+function queueLive(){clearTimeout(extTimer);extTimer=setTimeout(liveSearch,550);}
+async function liveSearch(){
+  const q=S.q.trim();
+  if(S.mode==="mart"||S.searchOff||q.length<2){S.ext={q:"",busy:false,list:[],err:null,open:false};renderExt();return;}
+  if(q===S.ext.q)return;
+  const seq=++extSeq;S.ext={q,busy:true,list:[],err:null,open:false};renderExt();
+  try{
+    const j=await api("/api/search?q="+encodeURIComponent(q));if(seq!==extSeq)return;
+    const known=new Set(PLACES.map(p=>p.k).filter(Boolean).map(String));
+    const list=(Array.isArray(j&&j.places)?j.places:[]).filter(x=>x&&/^\d{1,20}$/.test(String(x.k))&&x.ko&&!known.has(String(x.k)));
+    list.forEach(x=>EXTMAP.set(String(x.k),x));
+    S.ext={q,busy:false,list,err:null,open:false};
+  }catch(e){
+    if(seq!==extSeq)return;const c=e&&e.code;
+    if(c==="search_not_configured"||c==="http_404"){S.searchOff=true;S.ext={q,busy:false,list:[],err:null,open:false};}
+    else S.ext={q,busy:false,list:[],err:c||"offline",open:false};
+  }
+  renderExt();
+}
+function renderExt(){const el=document.getElementById("ext");if(el)el.innerHTML=extHtml();}
+function extMatch(x){const f=S.filter;if(f==="all")return true;if(f==="pick"||f==="halal"||f==="porkfree")return false;if(f==="chinese")return x.group==="Chinese";return x.group===f;}
+const UNVER=`<span class="badge b-none">${ic("info")}Unverified</span>`;
+function xcard(x){return `<a class="card pcard" href="#x-${esc(x.k)}"><div class="thumb"><span class="cu">${esc(x.group||"Food")}</span></div><div class="pinfo"><div class="row wrap" style="gap:6px">${UNVER}</div><h3>${esc(x.ko)}</h3><span class="small muted">${esc(x.cat||x.group||"")}${x.m!=null?` · ${x.m} m · ${x.w} min walk`:""}</span></div></a>`;}
+function extHtml(){
+  const x=S.ext,q=S.q.trim();
+  if(S.mode==="mart"||S.searchOff||q.length<2)return "";
+  if(S.filter==="pick"||S.filter==="halal"||S.filter==="porkfree")return "";
+  const head=`<div class="row between" style="margin:20px 0 8px"><h2 style="font-size:17px">More on Kakao Map</h2>${UNVER}</div>`;
+  if(x.busy||x.q!==q)return head+`<p class="small muted">Searching Kakao Map for “${esc(q)}”…</p>`;
+  if(x.err)return head+`<div class="card pad small row between" style="gap:10px"><span>${x.err==="rate_limited"?"Too many searches. Wait a minute, then try again.":"Could not search Kakao Map right now."}</span><button class="chip" onclick="S.ext.q='';liveSearch()">Try again</button></div>`;
+  const list=x.list.filter(extMatch);
+  if(!list.length)return head+`<p class="small muted">No other places within 3 km of ERICA${S.filter!=="all"?" for this filter":""}.</p>`;
+  const warn=`<p class="small muted" style="margin-bottom:10px">Found on Kakao Map, not in our list yet. Our team has not checked them, so they are <b>not checked for halal, pork-free or vegan food</b>.</p>`;
+  if(S.mode!=="general"&&!x.open)return head+warn+`<button class="btn block" onclick="S.ext.open=true;renderExt()">Show ${list.length} unchecked place${list.length>1?"s":""}</button>`;
+  return head+warn+`<div class="list">${list.slice(0,20).map(xcard).join("")}</div>`;
+}
+function vExt(k){
+  const x=EXTMAP.get(k);
+  if(!x)return `${topbar("Place")}<div class="card empty"><h3>Search again</h3><p class="small muted">This place came from a Kakao Map search. Search for it again on Explore.</p><a class="btn block" href="#explore" style="margin-top:10px">Go to Explore</a></div>`;
+  const url=/^https?:\/\//.test(x.url||"")?x.url:kakaoUrl(x);
+  return `${topbar(x.ko)}
+  <div class="card dhero"><div style="text-align:center;padding:16px"><div class="cu">${esc(x.group||"Food")}</div><p class="muted" style="margin-top:6px;font-weight:700">${esc(x.cat||"")}</p></div></div>
+  <section class="row wrap" style="gap:6px">${UNVER}</section>
+  <div style="display:flex;flex-direction:column;gap:4px;margin-top:-6px"><h1>${esc(x.ko)}</h1><p class="muted">${esc(x.group||x.cat||"")}${x.m!=null?` · ${x.m} m · ${x.w} min walk`:""}</p></div>
+  <div class="note" style="border-color:var(--muted);background:var(--paper);color:var(--ink)">Found on Kakao Map. Our team has not checked this place yet, so we do not know if it is halal, pork-free or vegan. Ask staff about pork, lard and alcohol before you order.</div>
+  <section class="card pad"><h3 style="margin-bottom:4px">Store details</h3><dl class="info" style="margin:0">
+    <div><dt>Korean name</dt><dd>${esc(x.ko)}</dd></div>
+    <div><dt>Food type</dt><dd>${esc(x.group||"-")}${x.cat&&x.cat!==x.group?`<br><span class="small muted">${esc(x.cat)}</span>`:""}</dd></div>
+    <div><dt>Dietary</dt><dd>Not checked</dd></div>
+    ${x.address?`<div><dt>Address</dt><dd>${esc(x.address)} <button class="badge b-halal" style="border:0;margin-left:4px" onclick="copyText(EXTMAP.get('${esc(x.k)}').address,'Address copied')">${ic("copy")}Copy</button></dd></div>`:""}
+    ${x.phone?`<div><dt>Phone</dt><dd><span style="user-select:all">${esc(x.phone)}</span></dd></div>`:""}
+    <div><dt>Distance</dt><dd>${x.m!=null?`${x.m} m from ERICA campus · about ${x.w} min walk`:"Near ERICA"}</dd></div>
+    <div><dt>Source</dt><dd>Kakao Map live search</dd></div>
+  </dl></section>
+  <section class="card pad" style="display:flex;flex-direction:column;gap:12px">
+    <h3>How to get there</h3>
+    <a class="btn naver block" href="${naverUrl(x)}" target="_blank" rel="noopener">${ic("nav")}Open in Naver Map</a>
+    <a class="btn block" href="${esc(url)}" target="_blank" rel="noopener" style="background:#FEE500">${ic("map")}Open in Kakao Map</a>
+  </section>`;
+}
 
 const DIETNOTE={none:"Nobody has checked this place for halal food yet. Ask staff about pork, lard and alcohol before you order.",chinese:"Chinese dishes often use pork or pork stock. Ask staff before you order.",halalc:"The name or category suggests halal food, but it is not verified. Ask to see the halal certificate.",veganc:"Salad place. Ask staff which dishes have no meat, egg or dairy."};
 function vPlace(id){
@@ -651,13 +716,14 @@ function route(){return (location.hash||"#home").slice(1)||"home";}
 let lastRoute=null;
 function render(){
   const r=route();const v=document.getElementById("view");
-  const html=r.startsWith("p-")?vPlace(r.slice(2)):r.startsWith("m-")?vMart(r.slice(2)):r==="marts"?vMarts():({home:vHome,explore:vExplore,bot:vBot,saved:vSaved,me:vMe}[r]||vHome)();
+  const html=r.startsWith("p-")?vPlace(r.slice(2)):r.startsWith("x-")?vExt(r.slice(2)):r.startsWith("m-")?vMart(r.slice(2)):r==="marts"?vMarts():({home:vHome,explore:vExplore,bot:vBot,saved:vSaved,me:vMe}[r]||vHome)();
   const active=document.activeElement&&document.activeElement.id;const sel=active&&document.activeElement.selectionStart;
   v.innerHTML=html;
   if(active){const el=document.getElementById(active);if(el&&el.tagName==="INPUT"&&r!=="bot"){el.focus();try{el.setSelectionRange(sel,sel)}catch(e){}}}
-  const top=r.startsWith("p-")?"explore":(r==="marts"||r.startsWith("m-"))?"home":(["home","explore","bot","saved","me"].includes(r)?r:"home");
+  const top=(r.startsWith("p-")||r.startsWith("x-"))?"explore":(r==="marts"||r.startsWith("m-"))?"home":(["home","explore","bot","saved","me"].includes(r)?r:"home");
   document.getElementById("tabs").innerHTML=TABS.map(([k,l,i])=>k==="bot"?`<a class="tab ai" href="#bot" ${top===k?'aria-current="page"':""}><span class="ic">${ic(i)}</span>${l}</a>`:`<a class="tab" href="#${k}" ${top===k?'aria-current="page"':""}>${ic(i,top===k&&k==="saved")}${l}</a>`).join("");
   if(r==="map"&&S.mapView==="kakao"&&CFG.KAKAO_JS_KEY)initKakao();
+  if(r==="explore"&&S.q.trim()!==S.ext.q)queueLive();
   if(r!==lastRoute){lastRoute=r;window.scrollTo(0,0);}
 }
 function softRender(){const a=document.activeElement;if(a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA"||a.tagName==="SELECT"))return;render();}
