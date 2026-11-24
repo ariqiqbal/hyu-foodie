@@ -13,7 +13,9 @@ They can tap "Add to Home Screen" to install it like an app.
 | `config.js` | Public settings: Supabase URL, Supabase anon key, Kakao JavaScript key |
 | `api/ai.js` | Server function: AI Bot and Import (calls the Claude API) |
 | `api/oembed.js` | Server function: reads the caption of a TikTok or YouTube link |
-| `supabase/schema.sql` | Database tables for votes and saved places |
+| `api/search.js` | Server function: live search for more places on Kakao Map (Kakao Local API) |
+| `tests/` | Automatic checks for the server functions. Run `npm test` |
+| `supabase/schema.sql` | Database tables for votes, saved places and places found by live search |
 | `manifest.webmanifest`, `sw.js`, `icon-*.png` | "Add to Home Screen" and offline support |
 
 ## Which features need which setup
@@ -24,6 +26,7 @@ They can tap "Add to Home Screen" to install it like an app.
 | Saved places on one phone | Yes | – |
 | Votes, ERICA Pick, saved places on all devices | No | Step 1 (Supabase) |
 | Real Kakao map | No | Step 2 (Kakao domain) |
+| "More on Kakao Map" live search | No (only the places in `places.json`) | Step 2b (Kakao REST key) + Step 4 (Vercel) |
 | AI Bot, screenshot import, link import | No (simple keyword mode only) | Step 3 (Claude API key) + Step 4 (Vercel) |
 
 ---
@@ -37,7 +40,7 @@ They can tap "Add to Home Screen" to install it like an app.
 4. Open **Project Settings** → **API**. Copy:
    - **Project URL** → put in `config.js` as `SUPABASE_URL`
    - **anon public** key → put in `config.js` as `SUPABASE_ANON_KEY`
-5. Do **not** use the `service_role` key anywhere. It is secret.
+5. The `service_role` key is secret. Never put it in `config.js` or GitHub. It may go **only** into Vercel (optional, Step 2b).
 
 ## Step 2 – Kakao map – about 2 min
 
@@ -50,6 +53,23 @@ The JavaScript key is already in `config.js`. Kakao only allows it on websites y
 4. Make sure **카카오맵** is still **ON**.
 
 If the map does not load, the app shows a message and the **Dot map** still works.
+
+## Step 2b – Kakao live search – about 3 min
+
+Explore shows a **More on Kakao Map** section under your search results. It finds restaurants and cafes
+within 3 km of ERICA that are not in `places.json` yet. They are marked **Unverified** and are never shown
+as halal, pork-free or vegan. In Halal and Vegetarian mode they stay hidden behind a button.
+
+1. **developers.kakao.com** → **HYU Foodie** app → **앱 키** → copy the **REST API 키**.
+   Use the same app as the map: Kakao gives the free quota only to the first app on each developer account.
+2. Make sure **카카오맵** is **ON** for the app (the Local API is part of it).
+3. Keep the REST key secret. It goes **only** into Vercel (Step 4) as `KAKAO_REST_KEY`, never into `config.js`.
+4. Optional, to keep a list of places students searched for (table `discovered_places`, status `unverified`):
+   run the newest `supabase/schema.sql`, then add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel.
+
+Cost note: Kakao's free quota is about 100,000 keyword searches per day. One student search uses 2
+(restaurants + cafes), and the same search within 10 minutes is answered from cache.
+English food words (ramen, pizza, halal …) are changed to Korean first, because Kakao search is Korean-first.
 
 ## Step 3 – Claude API key (AI features) – about 3 min
 
@@ -70,6 +90,9 @@ small model this is about 1–2 cents per question. The server allows 8 AI calls
    - `ANTHROPIC_API_KEY` = your key from Step 3
    - (optional) `ANTHROPIC_MODEL` = a different Claude model id (default: `claude-haiku-5-5`)
    - (optional) `AI_PER_MINUTE` = AI calls per minute per user (default: `8`)
+   - `KAKAO_REST_KEY` = your Kakao REST API key from Step 2b (for live search)
+   - (optional) `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` = save live-search places (Step 2b, point 4)
+   - (optional) `SEARCH_PER_MINUTE` = searches per minute per user (default: `20`), `SEARCH_RADIUS_M` (default: `3000`)
 5. Click **Deploy**. You get a link like `https://hyu-foodie.vercel.app`.
 6. Go back to Step 2 and add this link to the Kakao domains.
 
@@ -90,7 +113,8 @@ vercel --prod               # real link
 4. **AI Bot** → tap "Something spicy" → you get 1–3 places.
 5. **Import** → paste a TikTok link → it reads the caption and finds places.
 6. **Map** → **Kakao map** shows dots. Tap one → the card shows below.
-7. Browser menu → **Add to Home Screen**.
+7. **Explore** → type `ramen` → **More on Kakao Map** shows extra places marked **Unverified**. Tap one → Kakao/Naver buttons work.
+8. Browser menu → **Add to Home Screen**.
 
 ## Share with testers
 
@@ -106,7 +130,8 @@ vercel --prod               # real link
 ## Security notes
 
 - Public on purpose: Supabase URL, Supabase anon key, Kakao JavaScript key.
-- Secret, never in this folder: Claude API key, Kakao REST key, Supabase service_role key.
+- Secret, never in this folder: Claude API key, Kakao REST key, Supabase service_role key. They live only in Vercel.
+- `discovered_places`: everybody can read it; only the server (service_role key) can write to it.
 - Database rules (in `schema.sql`): each user can change only their own votes and saved places.
   Everybody sees only vote totals, not who voted.
 - Pictures are AI-made sample photos of the food type, not photos of the real shops.
